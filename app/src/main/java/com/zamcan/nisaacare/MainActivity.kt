@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -180,6 +181,7 @@ class MainActivity : Activity() {
     private fun renderOnboarding() {
         val root = FrameLayout(this).apply {
             setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream))
+            prepareEdgeToEdgeRoot(this)
         }
         val scroll = NisaaDesign.screenScroll(this)
         val body = scroll.getChildAt(0) as LinearLayout
@@ -549,7 +551,10 @@ class MainActivity : Activity() {
     }
 
     private fun renderShell() {
-        val root = FrameLayout(this).apply { setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream)) }
+        val root = FrameLayout(this).apply {
+            setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream))
+            prepareEdgeToEdgeRoot(this)
+        }
         val shell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream))
@@ -702,11 +707,51 @@ class MainActivity : Activity() {
     }
 
     internal fun configureSystemBars() {
-        window.statusBarColor = NisaaDesign.color(this, R.color.nisaa_cream)
-        window.navigationBarColor = NisaaDesign.color(this, R.color.nisaa_cream)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
         }
+        val night = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        var flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        if (!night && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
+        if (!night && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
+        window.decorView.systemUiVisibility = flags
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
+            window.isNavigationBarContrastEnforced = false
+        }
+    }
+
+    private fun prepareEdgeToEdgeRoot(root: View) {
+        val baseLeft = root.paddingLeft
+        val baseTop = root.paddingTop
+        val baseRight = root.paddingRight
+        val baseBottom = root.paddingBottom
+        root.setOnApplyWindowInsetsListener { view, insets ->
+            val top: Int
+            val bottom: Int
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val bars = insets.getInsets(WindowInsets.Type.systemBars())
+                top = bars.top
+                bottom = bars.bottom
+            } else {
+                @Suppress("DEPRECATION")
+                top = insets.systemWindowInsetTop
+                @Suppress("DEPRECATION")
+                bottom = insets.systemWindowInsetBottom
+            }
+            view.setPadding(baseLeft, baseTop + top, baseRight, baseBottom + bottom)
+            insets
+        }
+        root.requestApplyInsets()
     }
 
     private fun handlePairingIntent(intent: Intent?) {
