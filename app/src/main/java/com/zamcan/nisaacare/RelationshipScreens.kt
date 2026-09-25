@@ -25,6 +25,17 @@ import java.util.UUID
 
 internal fun MainActivity.buildMarriageScreen(): View {
     return standardScreen(getString(R.string.marriage_title)) { body ->
+        addSpaced(
+            body,
+            NisaaDesign.heroCard(
+                this,
+                getString(R.string.marriage_title),
+                getString(R.string.app_name),
+                getString(R.string.marriage_intro),
+                R.drawable.nisaa_hero_marriage
+            ),
+            14
+        )
         cardTitle(body, getString(R.string.marriage_title), getString(R.string.marriage_intro))
         val relationships = profile?.id?.let { repository.getRelationships(it) }.orEmpty()
         if (relationships.isEmpty()) {

@@ -228,6 +228,16 @@ class MainActivity : Activity() {
     }
 
     private fun onboardingWelcome(body: LinearLayout) {
+        body.addView(
+            NisaaDesign.heroCard(
+                this,
+                getString(R.string.app_tagline),
+                getString(R.string.app_name),
+                getString(R.string.app_description),
+                R.drawable.nisaa_hero_wellness
+            )
+        )
+        body.addView(NisaaDesign.space(this, 0, 18))
         body.addView(NisaaDesign.serif(this, getString(R.string.onboarding_welcome_title), 34f))
         body.addView(NisaaDesign.space(this, 0, 14))
         body.addView(NisaaDesign.body(this, getString(R.string.onboarding_welcome_body)))
