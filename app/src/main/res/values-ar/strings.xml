@@ -246,4 +246,20 @@
     <string name="confirmation_title">يرجى التأكيد</string>
     <string name="confirmation_revoke">سيؤدي ذلك إلى إزالة الوصول على هذا الجهاز.</string>
     <string name="confirm_revoke">إلغاء</string>
+
+    <string name="cycle_day_label">يوم الدورة</string>
+    <string name="cycle_day_format">اليوم %1$d</string>
+    <string name="cycle_phase_label">المرحلة الحالية</string>
+    <string name="phase_menstruation">الحيض</string>
+    <string name="phase_follicular">المرحلة الجريبية</string>
+    <string name="phase_ovulation">تقدير الإباضة</string>
+    <string name="phase_luteal">المرحلة الأصفرية</string>
+    <string name="phase_unknown">المعلومات غير كافية</string>
+    <string name="data_quality_label">جودة النمط</string>
+    <string name="data_quality_insufficient">غير كافية</string>
+    <string name="data_quality_developing">قيد التكوّن</string>
+    <string name="data_quality_established">مستقرة</string>
+    <string name="data_quality_variable">متغيرة</string>
+    <string name="care_review_title">نمط يستحق المراجعة</string>
+    <string name="care_review_body">قد تستحق بعض الملاحظات المسجلة مناقشتها مع مختص صحي مؤهل، خاصة إذا استمرت أو ازدادت أو أثرت في الحياة اليومية.</string>
 </resources>
