@@ -170,7 +170,7 @@ internal fun MainActivity.buildWomanHome(): View {
         cycleCard.addView(NisaaDesign.statusPill(this, confidenceLabel(insight.confidence), insight.confidence != com.zamcan.nisaacare.domain.model.Confidence.INSUFFICIENT_DATA))
         cycleCard.addView(NisaaDesign.space(this, 0, 14))
         val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val fertilityButton = NisaaDesign.secondaryButton(this, getString(R.string.home_view_fertility), R.drawable.ic_cycle) { navigate(AppScreen.FERTILITY) }
+        val fertilityButton = NisaaDesign.secondaryButton(this, getString(R.string.home_view_fertility), R.drawable.ic_fertility) { navigate(AppScreen.FERTILITY) }
         fertilityButton.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         row.addView(fertilityButton)
         row.addView(NisaaDesign.space(this, 8, 1))
@@ -316,7 +316,7 @@ internal fun MainActivity.buildFertilityScreen(): View = standardScreen(getStrin
     val insight = calculateInsight()
     addSpaced(body, NisaaDesign.statusPill(this, confidenceLabel(insight.confidence), insight.confidence != com.zamcan.nisaacare.domain.model.Confidence.INSUFFICIENT_DATA), 0)
     body.addView(NisaaDesign.space(this, 0, 12))
-    val disclaimer = infoCard(getString(R.string.fertility_title), getString(R.string.fertility_disclaimer), R.drawable.ic_lock, soft = true)
+    val disclaimer = infoCard(getString(R.string.fertility_title), getString(R.string.fertility_disclaimer), R.drawable.ic_shield, soft = true)
     addSpaced(body, disclaimer, 0)
     val metrics = NisaaDesign.card(this, 20)
     metrics.addView(NisaaDesign.eyebrow(this, getString(R.string.content_rotation_title)))
@@ -342,7 +342,7 @@ internal fun MainActivity.buildFertilityScreen(): View = standardScreen(getStrin
         ), 0)
     } else {
         addSpaced(body, NisaaDesign.softCard(this, 18).apply {
-            addView(NisaaDesign.icon(this@buildFertilityScreen, R.drawable.ic_education, R.color.nisaa_rose, 26))
+            addView(NisaaDesign.icon(this@buildFertilityScreen, R.drawable.ic_health, R.color.nisaa_rose, 26))
             addView(NisaaDesign.space(this@buildFertilityScreen, 0, 8))
             addView(NisaaDesign.body(this@buildFertilityScreen, getString(R.string.irregular_note)))
         }, 0)
@@ -510,7 +510,7 @@ private fun MainActivity.topicCard(item: ContentItem): LinearLayout = NisaaDesig
         selectedTopic = item
         navigate(AppScreen.TOPIC)
     }
-    addView(NisaaDesign.icon(this@topicCard, if (item.contentType == ContentType.HEALTH) R.drawable.ic_education else R.drawable.ic_faith, R.color.nisaa_rose, 24))
+    addView(NisaaDesign.icon(this@topicCard, if (item.contentType == ContentType.HEALTH) R.drawable.ic_health else R.drawable.ic_book, R.color.nisaa_rose, 24))
     addView(NisaaDesign.space(this@topicCard, 12, 1))
     addView(LinearLayout(this@topicCard).apply {
         orientation = LinearLayout.VERTICAL
