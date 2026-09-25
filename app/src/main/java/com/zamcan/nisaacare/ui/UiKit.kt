@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -294,6 +295,38 @@ object NisaaDesign {
         gravity = Gravity.CENTER_VERTICAL
         addView(body(context, label), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         addView(text(context, value, 15f, R.color.nisaa_ink, true, Gravity.END))
+    }
+
+    fun heroCard(
+        context: Context,
+        eyebrow: CharSequence,
+        title: CharSequence,
+        body: CharSequence,
+        artRes: Int
+    ): FrameLayout = FrameLayout(context).apply {
+        background = rounded(context, color(context, R.color.nisaa_surface_alt), color(context, R.color.nisaa_line), 24)
+        minimumHeight = dp(context, 190)
+        clipChildren = true
+        val copy = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(context, 20), dp(context, 18), dp(context, 126), dp(context, 18))
+            addView(eyebrow(context, eyebrow))
+            addView(space(context, 0, 7))
+            addView(serif(context, title, 24f))
+            addView(space(context, 0, 7))
+            addView(body(context, body))
+        }
+        addView(copy, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        addView(ImageView(context).apply {
+            setImageResource(artRes)
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            alpha = 0.98f
+        }, FrameLayout.LayoutParams(dp(context, 190), dp(context, 190), Gravity.END or Gravity.CENTER_VERTICAL))
     }
 
     fun statePanel(
