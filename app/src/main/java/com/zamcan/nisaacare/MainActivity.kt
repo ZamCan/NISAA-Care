@@ -48,6 +48,9 @@ import com.zamcan.nisaacare.domain.model.Relationship
 import com.zamcan.nisaacare.domain.model.RelationshipStatus
 import com.zamcan.nisaacare.domain.model.UserProfile
 import com.zamcan.nisaacare.domain.model.UserRole
+import com.zamcan.nisaacare.domain.relationship.PairingPayload
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.zamcan.nisaacare.ui.NisaaDesign
 import com.zamcan.nisaacare.ui.PatternView
 import java.time.LocalDate
@@ -87,6 +90,7 @@ class MainActivity : Activity() {
     internal var selectedTopic: ContentItem? = null
     internal var selectedRelationshipId: String? = null
     internal var lastInvitation: PairingInvitation? = null
+    internal var pendingPairingCode: String? = null
 
     internal var draftProfile: UserProfile? = null
     internal var draftStep: Int = 0
@@ -137,6 +141,79 @@ class MainActivity : Activity() {
         super.onResume()
         profile = repository.getProfile()
         if (profile != null) preferences = repository.getPreferences(profile!!.id)
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = com.journeyapps.barcodescanner.IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            val raw = result.contents
+            if (!raw.isNullOrBlank()) {
+                handlePairingPayload(raw)
+            } else {
+                showToast(getString(R.string.pairing_not_configured))
+            }
+            return
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    internal fun startPairingQrScan() {
+        if (android.os.Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), PAIRING_CAMERA_PERMISSION_REQUEST)
+            return
+        }
+        val options = ScanOptions().apply {
+            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            setPrompt(getString(R.string.pairing_qr_title))
+            setBeepEnabled(false)
+            setOrientationLocked(false)
+        }
+        ScanContract().createIntent(this, options).let { intent ->
+            startActivityForResult(intent, PAIRING_QR_REQUEST)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PAIRING_CAMERA_PERMISSION_REQUEST &&
+            grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        ) {
+            startPairingQrScan()
+        } else if (requestCode == PAIRING_CAMERA_PERMISSION_REQUEST) {
+            showToast(getString(R.string.pairing_fallback))
+        }
+    }
+
+    private fun handlePairingPayload(raw: String) {
+        val payload = PairingPayload.parse(raw)
+        if (payload == null) {
+            val local = repository.findInvitation(raw.trim())
+            if (local != null) {
+                lastInvitation = local
+                pendingPairingCode = local.token
+                if (profile?.onboardingComplete == true) navigate(AppScreen.MARRIAGE)
+                return
+            }
+            showToast(getString(R.string.pairing_not_configured))
+            return
+        }
+        if (!payload.toInvitation().isUsable()) {
+            showToast(getString(R.string.pairing_not_configured))
+            return
+        }
+        val saved = repository.saveInvitation(payload.toInvitation())
+        if (saved is DomainResult.Failure) {
+            showToast(saved.error.message)
+            return
+        }
+        lastInvitation = payload.toInvitation()
+        pendingPairingCode = payload.token
+        showToast(getString(R.string.pairing_qr_received))
+        if (profile?.onboardingComplete == true) navigate(AppScreen.MARRIAGE)
     }
 
     @Suppress("DEPRECATION")
@@ -765,15 +842,14 @@ class MainActivity : Activity() {
     }
 
     private fun handlePairingIntent(intent: Intent?) {
-        val token = intent?.data?.getQueryParameter("token") ?: return
-        if (token.isNotBlank()) {
-            lastInvitation = repository.findInvitation(token)
-            if (profile?.onboardingComplete == true) navigate(AppScreen.MARRIAGE)
-        }
+        val data = intent?.data ?: return
+        handlePairingPayload(data.toString())
     }
 
     companion object {
         const val ONBOARDING_STEPS = 10
         const val NOTIFICATION_PERMISSION_REQUEST = 701
+        const val PAIRING_QR_REQUEST = 702
+        const val PAIRING_CAMERA_PERMISSION_REQUEST = 703
     }
 }
