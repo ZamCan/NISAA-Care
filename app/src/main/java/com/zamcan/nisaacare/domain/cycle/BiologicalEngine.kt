@@ -3,6 +3,8 @@ package com.zamcan.nisaacare.domain.cycle
 import com.zamcan.nisaacare.domain.model.Confidence
 import com.zamcan.nisaacare.domain.model.CycleInsight
 import com.zamcan.nisaacare.domain.model.CycleRecord
+import com.zamcan.nisaacare.domain.model.CyclePhase
+import com.zamcan.nisaacare.domain.model.DataQuality
 import com.zamcan.nisaacare.domain.model.FertilityEstimate
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -37,6 +39,9 @@ class BiologicalEngine {
         if (starts.isEmpty()) {
             return CycleInsight(
                 referenceDate = referenceDate,
+                cycleDay = null,
+                currentPhase = CyclePhase.UNKNOWN,
+                dataQuality = DataQuality.INSUFFICIENT,
                 observedCycleCount = 0,
                 averageCycleLength = null,
                 variabilityDays = null,
@@ -67,6 +72,9 @@ class BiologicalEngine {
                     .roundToInt()
             }
         val predictedStart = safePlusDays(lastPeriodStart, average.toLong())
+        val cycleDay = ChronoUnit.DAYS.between(lastPeriodStart, referenceDate).toInt() + 1
+        val currentPhase = phaseFor(cycleDay, average, lastPeriodStart, referenceDate)
+        val dataQuality = dataQualityFor(usableIntervals, variability)
         val ovulation = predictedStart?.let { safePlusDays(it, -OVULATION_DAYS_BEFORE_NEXT_PERIOD.toLong()) }
         val fertileStart = ovulation?.let { safePlusDays(it, -FERTILE_WINDOW_DAYS_BEFORE_OVULATION.toLong()) }
         val fertileEnd = ovulation?.let { safePlusDays(it, FERTILE_WINDOW_DAYS_AFTER_OVULATION.toLong()) }
@@ -74,6 +82,9 @@ class BiologicalEngine {
 
         return CycleInsight(
             referenceDate = referenceDate,
+            cycleDay = cycleDay.takeIf { it > 0 },
+            currentPhase = currentPhase,
+            dataQuality = dataQuality,
             observedCycleCount = usableIntervals.size,
             averageCycleLength = average,
             variabilityDays = variability,
@@ -90,6 +101,25 @@ class BiologicalEngine {
                 else -> "Estimates are based on your recorded history and may change as you add data."
             }
         )
+    }
+
+    private fun phaseFor(cycleDay: Int, average: Int, start: LocalDate, referenceDate: LocalDate): CyclePhase {
+        if (cycleDay < 1) return CyclePhase.UNKNOWN
+        val day = cycleDay.coerceAtMost(average)
+        if (day <= 5 && referenceDate >= start) return CyclePhase.MENSTRUATION
+        val ovulationDay = (average - OVULATION_DAYS_BEFORE_NEXT_PERIOD).coerceAtLeast(1)
+        return when {
+            day < ovulationDay -> CyclePhase.FOLLICULAR
+            day == ovulationDay -> CyclePhase.OVULATION_ESTIMATE
+            else -> CyclePhase.LUTEAL
+        }
+    }
+
+    private fun dataQualityFor(intervals: List<Int>, variability: Int?): DataQuality = when {
+        intervals.isEmpty() -> DataQuality.DEVELOPING
+        variability != null && variability >= IRREGULAR_VARIABILITY_DAYS -> DataQuality.VARIABLE
+        intervals.size >= 3 -> DataQuality.ESTABLISHED
+        else -> DataQuality.DEVELOPING
     }
 
     fun toEstimate(

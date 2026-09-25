@@ -255,4 +255,20 @@
     <string name="confirmation_title">Please confirm</string>
     <string name="confirmation_revoke">This removes access on this device. It does not promise deletion from a future server.</string>
     <string name="confirm_revoke">Revoke</string>
+
+    <string name="cycle_day_label">Cycle day</string>
+    <string name="cycle_day_format">Day %1$d</string>
+    <string name="cycle_phase_label">Current phase</string>
+    <string name="phase_menstruation">Menstruation</string>
+    <string name="phase_follicular">Follicular phase</string>
+    <string name="phase_ovulation">Estimated ovulation</string>
+    <string name="phase_luteal">Luteal phase</string>
+    <string name="phase_unknown">Not enough data</string>
+    <string name="data_quality_label">Pattern quality</string>
+    <string name="data_quality_insufficient">Insufficient</string>
+    <string name="data_quality_developing">Developing</string>
+    <string name="data_quality_established">Established</string>
+    <string name="data_quality_variable">Variable</string>
+    <string name="care_review_title">A pattern worth reviewing</string>
+    <string name="care_review_body">Some logged observations can be worth discussing with a qualified health professional, especially if they persist, worsen, or affect daily life.</string>
 </resources>

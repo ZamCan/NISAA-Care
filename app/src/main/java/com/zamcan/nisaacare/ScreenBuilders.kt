@@ -21,6 +21,8 @@ import com.zamcan.nisaacare.domain.model.AppLanguage
 import com.zamcan.nisaacare.domain.model.ContentItem
 import com.zamcan.nisaacare.domain.model.ContentType
 import com.zamcan.nisaacare.domain.model.CycleRecord
+import com.zamcan.nisaacare.domain.model.CyclePhase
+import com.zamcan.nisaacare.domain.cycle.CycleCareAssessment
 import com.zamcan.nisaacare.domain.model.DomainResult
 import com.zamcan.nisaacare.domain.model.FlowIntensity
 import com.zamcan.nisaacare.domain.model.PermissionKey
@@ -191,6 +193,17 @@ internal fun MainActivity.buildWomanHome(): View {
     }
     addSpaced(body, cycleCard, 0)
 
+    val careFlags = profile?.id?.let { CycleCareAssessment.evaluate(repository.getCycles(it)) }.orEmpty()
+    if (careFlags.isNotEmpty()) {
+        addSpaced(body, NisaaDesign.softCard(this, 18).apply {
+            addView(NisaaDesign.icon(this@buildWomanHome, R.drawable.ic_shield, R.color.nisaa_terracotta, 26))
+            addView(NisaaDesign.space(this@buildWomanHome, 0, 8))
+            addView(NisaaDesign.text(this@buildWomanHome, getString(R.string.care_review_title), 17f, R.color.nisaa_ink, true))
+            addView(NisaaDesign.space(this@buildWomanHome, 0, 6))
+            addView(NisaaDesign.body(this@buildWomanHome, getString(R.string.care_review_body)))
+        }, 12)
+    }
+
     val wellbeing = infoCard(
         getString(R.string.home_wellbeing),
         getString(R.string.health_intro),
@@ -241,6 +254,9 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
         })
     } else {
         summary.addView(NisaaDesign.body(this, getString(R.string.last_period_start, dateText(insight.lastPeriodStart))))
+        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.cycle_day_label), insight.cycleDay?.let { getString(R.string.cycle_day_format, it) } ?: getString(R.string.optional)), 10)
+        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.cycle_phase_label), phaseLabel(insight.currentPhase)), 10)
+        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.data_quality_label), dataQualityLabel(insight.dataQuality)), 10)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.predicted_period_start), dateText(insight.predictedPeriodStart)), 12)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.confidence_low), confidenceLabel(insight.confidence)), 10)
     }
@@ -354,6 +370,21 @@ internal fun MainActivity.buildFertilityScreen(): View = standardScreen(getStrin
             addView(NisaaDesign.body(this@buildFertilityScreen, getString(R.string.irregular_note)))
         }, 0)
     }
+}
+
+internal fun MainActivity.phaseLabel(phase: CyclePhase): String = when (phase) {
+    CyclePhase.MENSTRUATION -> getString(R.string.phase_menstruation)
+    CyclePhase.FOLLICULAR -> getString(R.string.phase_follicular)
+    CyclePhase.OVULATION_ESTIMATE -> getString(R.string.phase_ovulation)
+    CyclePhase.LUTEAL -> getString(R.string.phase_luteal)
+    CyclePhase.UNKNOWN -> getString(R.string.phase_unknown)
+}
+
+internal fun MainActivity.dataQualityLabel(value: com.zamcan.nisaacare.domain.model.DataQuality): String = when (value) {
+    com.zamcan.nisaacare.domain.model.DataQuality.INSUFFICIENT -> getString(R.string.data_quality_insufficient)
+    com.zamcan.nisaacare.domain.model.DataQuality.DEVELOPING -> getString(R.string.data_quality_developing)
+    com.zamcan.nisaacare.domain.model.DataQuality.ESTABLISHED -> getString(R.string.data_quality_established)
+    com.zamcan.nisaacare.domain.model.DataQuality.VARIABLE -> getString(R.string.data_quality_variable)
 }
 
 private fun MainActivity.dateRange(start: LocalDate?, end: LocalDate?): String {
