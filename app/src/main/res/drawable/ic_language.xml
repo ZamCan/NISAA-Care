@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/nisaa_gold" android:pathData="M12,3A9,9 0,1 0,12 21A9,9 0,1 0,12 3M4.9,10H8.1C8.2,8.5 8.7,7.1 9.4,6.1C7.1,6.9 5.4,8.2 4.9,10M15.9,10H19.1C18.6,8.2 16.9,6.9 14.6,6.1C15.3,7.1 15.8,8.5 15.9,10M8.1,14H4.9C5.4,15.8 7.1,17.1 9.4,17.9C8.7,16.9 8.2,15.5 8.1,14M15.9,14C15.8,15.5 15.3,16.9 14.6,17.9C16.9,17.1 18.6,15.8 19.1,14Z M10,10H14V14H10Z"/>
+</vector>
