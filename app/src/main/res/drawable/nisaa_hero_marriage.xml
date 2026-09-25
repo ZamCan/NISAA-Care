@@ -2,8 +2,8 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="320dp" android:height="220dp" android:viewportWidth="320" android:viewportHeight="220">
     <path android:fillColor="#F1DDE2" android:pathData="M0,0L320,0L320,220L0,220Z"/>
-    <circle android:fillColor="#A65363" android:alpha="0.15" android:cx="75" android:cy="65" android:r="55"/>
-    <circle android:fillColor="#6C8375" android:alpha="0.12" android:cx="265" android:cy="68" android:r="62"/>
+    <circle android:fillColor="#A65363" android:alpha="0.15"/>
+    <circle android:fillColor="#6C8375" android:alpha="0.12"/>
     <path android:fillColor="#A65363" android:pathData="M77,164C77,133 91,111 114,104C130,99 145,107 149,121C153,134 148,148 137,158C129,166 125,174 123,188L91,188C90,177 86,170 77,164Z"/>
     <path android:fillColor="#FCF8F4" android:pathData="M99,120C109,110 123,110 132,119C136,124 137,130 135,136C129,130 121,129 114,133C108,137 105,143 103,150C98,142 96,130 99,120Z"/>
     <path android:fillColor="#6C8375" android:pathData="M171,164C171,133 185,111 208,104C224,99 239,107 243,121C247,134 242,148 231,158C223,166 219,174 217,188L185,188C184,177 180,170 171,164Z"/>
