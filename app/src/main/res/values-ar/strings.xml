@@ -262,4 +262,13 @@
     <string name="data_quality_variable">متغيرة</string>
     <string name="care_review_title">نمط يستحق المراجعة</string>
     <string name="care_review_body">قد تستحق بعض الملاحظات المسجلة مناقشتها مع مختص صحي مؤهل، خاصة إذا استمرت أو ازدادت أو أثرت في الحياة اليومية.</string>
+    <string name="pairing_qr_title">الاقتران عبر QR عند القرب</string>
+    <string name="pairing_qr_body">اعرض هذا الرمز لزوجك أو زوجتك القريب منك، أو امسح رمز NISAA CARE من الطرف الآخر. يحتوي QR على بيانات اقتران مؤقتة فقط.</string>
+    <string name="pairing_show_qr">عرض رمز QR</string>
+    <string name="pairing_scan_qr">مسح رمز QR</string>
+    <string name="pairing_qr_received">تم استلام رمز الاقتران</string>
+    <string name="pairing_accept_received">قبول هذا الاقتران</string>
+    <string name="pairing_install_link">تثبيت NISAA CARE</string>
+    <string name="pairing_share_secure_note">لا تتضمن وصلة الاقتران أي معلومات عن الدورة أو الخصوبة أو الصحة.</string>
+    <string name="pairing_whatsapp_message">دعوة للاقتران بين الزوجين عبر NISAA CARE.\n\nرمز الاقتران: %2$s\n\nفتح في NISAA CARE: %3$s\n\nإذا لم يكن NISAA CARE مثبتًا، ثبّته من هنا: %4$s\nثم ارجع إلى NISAA CARE وأدخل رمز الاقتران.\n\n%1$s</string>
 </resources>
