@@ -271,4 +271,13 @@
     <string name="data_quality_variable">Variable</string>
     <string name="care_review_title">A pattern worth reviewing</string>
     <string name="care_review_body">Some logged observations can be worth discussing with a qualified health professional, especially if they persist, worsen, or affect daily life.</string>
+    <string name="pairing_qr_title">Nearby QR pairing</string>
+    <string name="pairing_qr_body">Show this code to your spouse nearby, or scan their NISAA CARE code. The QR contains only a short-lived pairing credential.</string>
+    <string name="pairing_show_qr">Show QR code</string>
+    <string name="pairing_scan_qr">Scan QR code</string>
+    <string name="pairing_qr_received">Pairing code received</string>
+    <string name="pairing_accept_received">Accept this pairing</string>
+    <string name="pairing_install_link">Install NISAA CARE</string>
+    <string name="pairing_share_secure_note">No cycle, fertility, or health information is included in the pairing link.</string>
+    <string name="pairing_whatsapp_message">NISAA CARE spouse pairing invitation.\n\nPairing code: %2$s\n\nOpen in NISAA CARE: %3$s\n\nIf NISAA CARE is not installed, install it here: %4$s\nThen return to NISAA CARE and enter the pairing code.\n\n%1$s</string>
 </resources>
