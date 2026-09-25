@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nisaa_ink">#2F2333</color>
+    <color name="nisaa_ink_soft">#66596B</color>
+    <color name="nisaa_cream">#FCF8F4</color>
+    <color name="nisaa_surface">#FFFFFF</color>
+    <color name="nisaa_surface_alt">#F5EEF1</color>
+    <color name="nisaa_rose">#A65363</color>
+    <color name="nisaa_rose_dark">#7E3E4B</color>
+    <color name="nisaa_rose_soft">#F1DDE2</color>
+    <color name="nisaa_terracotta">#BF6A4E</color>
+    <color name="nisaa_sage">#6C8375</color>
+    <color name="nisaa_sage_soft">#E2ECE5</color>
+    <color name="nisaa_gold">#B78945</color>
+    <color name="nisaa_gold_soft">#F5E9D2</color>
+    <color name="nisaa_lilac">#E9E0EA</color>
+    <color name="nisaa_line">#E6DCE1</color>
+</resources>

@@ -1,0 +1,14 @@
+{
+  "packageName": "bundled-content",
+  "version": 1,
+  "signatureVerified": false,
+  "health": [
+    {"id":"health_menstruation","topicKey":"MENSTRUATION","source":"CONTENT_REVIEW_REQUIRED","reference":"Editorial review pending","reviewState":"REVIEW_REQUIRED","version":1},
+    {"id":"health_menstrual_cycle","topicKey":"MENSTRUAL_CYCLE","source":"CONTENT_REVIEW_REQUIRED","reference":"Editorial review pending","reviewState":"REVIEW_REQUIRED","version":1}
+  ],
+  "islamic": [
+    {"id":"islamic_quran","topicKey":"QURAN","source":"CONTENT_REVIEW_REQUIRED","reference":"Editorial review pending","reviewState":"REVIEW_REQUIRED","version":1},
+    {"id":"islamic_hadith","topicKey":"HADITH","source":"CONTENT_REVIEW_REQUIRED","reference":"Editorial review pending","reviewState":"REVIEW_REQUIRED","version":1}
+  ],
+  "quotations": []
+}

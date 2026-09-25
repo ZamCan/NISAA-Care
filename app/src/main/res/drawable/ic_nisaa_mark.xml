@@ -1,0 +1,5 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="96dp" android:height="96dp" android:viewportWidth="96" android:viewportHeight="96">
+    <path android:fillColor="@color/nisaa_rose" android:pathData="M48,8A40,40 0,1 0,48 88A40,40 0,1 0,48 8" />
+    <path android:fillColor="@color/nisaa_cream" android:pathData="M48,22C36,22 28,31 28,43C28,55 37,64 48,74C59,64 68,55 68,43C68,31 60,22 48,22M48,30C55,30 60,35 60,43C60,50 55,56 48,63C41,56 36,50 36,43C36,35 41,30 48,30" />
+    <path android:fillColor="@color/nisaa_gold" android:pathData="M48,17L50.5,24L58,24L52,29L54,37L48,33L42,37L44,29L38,24L45.5,24Z" />
+</vector>

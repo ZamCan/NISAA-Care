@@ -1,0 +1,31 @@
+# Gradle and Android build output
+.gradle/
+build/
+*/build/
+.cxx/
+
+# Local SDK and signing configuration
+local.properties
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+
+# IDE and generated files
+.idea/
+*.iml
+.kotlin/
+captures/
+.externalNativeBuild/
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.bak
+.DS_Store
+
+# Never commit generated artifacts or device data
+*.apk
+*.aab
+*.aab.idsig
+*.idsig
