@@ -262,4 +262,13 @@
     <string name="data_quality_variable">Inabadilika</string>
     <string name="care_review_title">Muundo unaofaa kuangaliwa</string>
     <string name="care_review_body">Baadhi ya taarifa ulizorekodi zinaweza kuwa sababu ya kuzungumza na mtaalamu wa afya, hasa zikidumu, kuongezeka, au kuathiri maisha ya kila siku.</string>
+    <string name="pairing_qr_title">Kuunganisha kwa QR ukiwa karibu</string>
+    <string name="pairing_qr_body">Muonyeshe mwenzi wako msimbo huu akiwa karibu, au skani msimbo wake wa NISAA CARE. QR ina kitambulisho cha muda mfupi tu cha kuunganisha.</string>
+    <string name="pairing_show_qr">Onyesha QR</string>
+    <string name="pairing_scan_qr">Skani QR</string>
+    <string name="pairing_qr_received">Msimbo wa kuunganisha umepokelewa</string>
+    <string name="pairing_accept_received">Kubali muunganiko huu</string>
+    <string name="pairing_install_link">Sakinisha NISAA CARE</string>
+    <string name="pairing_share_secure_note">Hakuna taarifa za hedhi, uzazi, au afya zilizowekwa kwenye kiungo cha kuunganisha.</string>
+    <string name="pairing_whatsapp_message">Mwaliko wa kuunganisha mwenzi kupitia NISAA CARE.\n\nMsimbo wa kuunganisha: %2$s\n\nFungua kwenye NISAA CARE: %3$s\n\nKama NISAA CARE haijasakinishwa, isakinishe hapa: %4$s\nKisha rudi NISAA CARE na uweke msimbo wa kuunganisha.\n\n%1$s</string>
 </resources>
