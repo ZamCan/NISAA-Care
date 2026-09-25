@@ -164,7 +164,9 @@ private fun MainActivity.pairingCard(): LinearLayout = NisaaDesign.card(this, 20
     addView(NisaaDesign.divider(this@pairingCard))
     addView(NisaaDesign.space(this@pairingCard, 0, 14))
     addView(NisaaDesign.eyebrow(this@pairingCard, getString(R.string.accept_invitation)))
-    val code = NisaaDesign.field(this@pairingCard, getString(R.string.pairing_code_hint))
+    val code = NisaaDesign.field(this@pairingCard, getString(R.string.pairing_code_hint)).apply {
+        pendingPairingCode?.let(::setText)
+    }
     addView(code)
     addView(NisaaDesign.space(this@pairingCard, 0, 9))
     addView(NisaaDesign.secondaryButton(this@pairingCard, getString(R.string.pairing_confirm), R.drawable.ic_check) {
@@ -267,6 +269,7 @@ private fun MainActivity.acceptInvitation(rawCode: String) {
         repository.markInvitationConsumed(code)
         selectedRelationshipId = result.value.id
         lastInvitation = null
+        pendingPairingCode = null
         showToast(getString(R.string.relationship_active))
         render()
     } else {
