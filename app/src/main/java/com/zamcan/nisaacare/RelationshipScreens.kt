@@ -10,6 +10,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
 import com.zamcan.nisaacare.domain.model.DomainResult
@@ -20,6 +21,9 @@ import com.zamcan.nisaacare.domain.model.RelationshipPermissions
 import com.zamcan.nisaacare.domain.model.RelationshipStatus
 import com.zamcan.nisaacare.domain.model.SupportRequest
 import com.zamcan.nisaacare.domain.model.UserRole
+import com.zamcan.nisaacare.domain.relationship.PairingLinks
+import com.zamcan.nisaacare.domain.relationship.PairingPayload
+import com.zamcan.nisaacare.ui.PairingQrCode
 import com.zamcan.nisaacare.ui.NisaaDesign
 import java.util.UUID
 
@@ -130,6 +134,7 @@ private fun MainActivity.pairingCard(): LinearLayout = NisaaDesign.card(this, 20
     addView(NisaaDesign.body(this@pairingCard, getString(R.string.connection_body)))
     val invitation = lastInvitation
     if (invitation != null && invitation.isUsable()) {
+        val payload = PairingPayload.fromInvitation(invitation)
         addView(NisaaDesign.space(this@pairingCard, 0, 14))
         addView(NisaaDesign.statusPill(this@pairingCard, getString(R.string.invitation_created), true))
         addView(NisaaDesign.space(this@pairingCard, 0, 8))
@@ -137,7 +142,18 @@ private fun MainActivity.pairingCard(): LinearLayout = NisaaDesign.card(this, 20
         addView(NisaaDesign.space(this@pairingCard, 0, 4))
         addView(NisaaDesign.body(this@pairingCard, getString(R.string.invitation_expires)).apply { gravity = Gravity.CENTER })
         addView(NisaaDesign.space(this@pairingCard, 0, 13))
+        val qr = ImageView(this@pairingCard).apply {
+            setImageBitmap(PairingQrCode.create(payload.toUri(), NisaaDesign.dp(this@pairingCard, 260)))
+            adjustViewBounds = true
+            contentDescription = getString(R.string.pairing_qr_title)
+            setPadding(NisaaDesign.dp(this@pairingCard, 10), NisaaDesign.dp(this@pairingCard, 10), NisaaDesign.dp(this@pairingCard, 10), NisaaDesign.dp(this@pairingCard, 10))
+        }
+        addView(qr, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this@pairingCard, 280)))
+        addView(NisaaDesign.body(this@pairingCard, getString(R.string.pairing_qr_body)).apply { gravity = Gravity.CENTER })
+        addView(NisaaDesign.space(this@pairingCard, 0, 12))
         addView(NisaaDesign.primaryButton(this@pairingCard, getString(R.string.share_whatsapp), R.drawable.ic_share) { shareInvitation(invitation) })
+        addView(NisaaDesign.space(this@pairingCard, 0, 8))
+        addView(NisaaDesign.secondaryButton(this@pairingCard, getString(R.string.pairing_show_qr), R.drawable.ic_share) { showPairingQr(invitation) })
         addView(NisaaDesign.space(this@pairingCard, 0, 8))
         addView(NisaaDesign.outlineButton(this@pairingCard, getString(R.string.copy_invitation), R.drawable.ic_check) { copyInvitation(invitation) })
     } else {
@@ -154,10 +170,16 @@ private fun MainActivity.pairingCard(): LinearLayout = NisaaDesign.card(this, 20
     addView(NisaaDesign.secondaryButton(this@pairingCard, getString(R.string.pairing_confirm), R.drawable.ic_check) {
         acceptInvitation(code.text.toString())
     })
+    addView(NisaaDesign.space(this@pairingCard, 0, 8))
+    addView(NisaaDesign.outlineButton(this@pairingCard, getString(R.string.pairing_scan_qr), R.drawable.ic_share) {
+        startPairingQrScan()
+    })
     addView(NisaaDesign.space(this@pairingCard, 0, 10))
     addView(NisaaDesign.body(this@pairingCard, getString(R.string.pairing_not_configured)))
     addView(NisaaDesign.space(this@pairingCard, 0, 7))
     addView(NisaaDesign.body(this@pairingCard, getString(R.string.pairing_fallback)))
+    addView(NisaaDesign.space(this@pairingCard, 0, 7))
+    addView(NisaaDesign.body(this@pairingCard, getString(R.string.pairing_share_secure_note)))
 }
 
 private fun MainActivity.createInvitation() {
@@ -174,13 +196,36 @@ private fun MainActivity.createInvitation() {
 }
 
 private fun MainActivity.shareInvitation(invitation: PairingInvitation) {
-    val message = getString(R.string.pairing_share_message, getString(R.string.app_name), "nisaacare://pair?token=" + invitation.token)
+    val payload = PairingPayload.fromInvitation(invitation)
+    val message = getString(
+        R.string.pairing_whatsapp_message,
+        getString(R.string.app_name),
+        invitation.token,
+        payload.toUri(),
+        PairingLinks.INSTALL_URL
+    )
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/?text=" + Uri.encode(message)))
     try {
         startActivity(intent)
     } catch (_: Exception) {
         showToast(getString(R.string.pairing_fallback))
     }
+}
+
+private fun MainActivity.showPairingQr(invitation: PairingInvitation) {
+    val payload = PairingPayload.fromInvitation(invitation)
+    val image = ImageView(this).apply {
+        setImageBitmap(PairingQrCode.create(payload.toUri(), NisaaDesign.dp(this@showPairingQr, 640)))
+        adjustViewBounds = true
+        contentDescription = getString(R.string.pairing_qr_title)
+        setPadding(NisaaDesign.dp(this@showPairingQr, 18), NisaaDesign.dp(this@showPairingQr, 18), NisaaDesign.dp(this@showPairingQr, 18), NisaaDesign.dp(this@showPairingQr, 18))
+    }
+    AlertDialog.Builder(this)
+        .setTitle(R.string.pairing_qr_title)
+        .setMessage(R.string.pairing_qr_body)
+        .setView(image)
+        .setPositiveButton(R.string.close, null)
+        .show()
 }
 
 private fun MainActivity.copyInvitation(invitation: PairingInvitation) {
