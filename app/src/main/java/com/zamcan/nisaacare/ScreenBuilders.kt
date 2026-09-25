@@ -147,9 +147,16 @@ internal fun MainActivity.buildWomanHome(): View {
     body.setPadding(NisaaDesign.dp(this, 20), NisaaDesign.dp(this, 22), NisaaDesign.dp(this, 20), NisaaDesign.dp(this, 30))
     val current = profile
     val name = current?.displayName?.takeIf { it.isNotBlank() }
-    body.addView(NisaaDesign.eyebrow(this, getString(R.string.home_today)))
-    body.addView(NisaaDesign.serif(this, if (name == null) getString(R.string.home_greeting_generic) else getString(R.string.home_greeting, name), 29f))
-    body.addView(NisaaDesign.space(this, 0, 20))
+    body.addView(
+        NisaaDesign.heroCard(
+            this,
+            getString(R.string.home_today),
+            if (name == null) getString(R.string.home_greeting_generic) else getString(R.string.home_greeting, name),
+            getString(R.string.app_tagline),
+            R.drawable.nisaa_hero_wellness
+        )
+    )
+    body.addView(NisaaDesign.space(this, 0, 18))
 
     val insight = calculateInsight()
     val cycleCard = NisaaDesign.card(this, 20)
@@ -187,7 +194,7 @@ internal fun MainActivity.buildWomanHome(): View {
     val wellbeing = infoCard(
         getString(R.string.home_wellbeing),
         getString(R.string.health_intro),
-        R.drawable.ic_education,
+        R.drawable.ic_health,
         soft = true
     )
     wellbeing.addView(NisaaDesign.space(this, 0, 13))
@@ -197,7 +204,7 @@ internal fun MainActivity.buildWomanHome(): View {
     val faith = infoCard(
         getString(R.string.home_faith),
         getString(R.string.faith_intro),
-        R.drawable.ic_faith,
+        R.drawable.ic_book,
         soft = true
     )
     faith.addView(NisaaDesign.space(this, 0, 13))
