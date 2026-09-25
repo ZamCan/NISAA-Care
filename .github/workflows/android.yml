@@ -1,0 +1,34 @@
+name: Android verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Verify
+        run: ./gradlew test assembleDebug bundleRelease
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nisaa-care-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: nisaa-care-aab
+          path: app/build/outputs/bundle/release/app-release.aab
