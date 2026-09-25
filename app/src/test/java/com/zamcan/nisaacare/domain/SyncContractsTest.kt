@@ -20,7 +20,7 @@ class SyncContractsTest {
         val local = snapshot(version = 3, updated = Instant.parse("2025-01-01T00:00:00Z"), fertility = false)
         val remote = snapshot(version = 4, updated = Instant.parse("2025-01-01T00:00:00Z"), fertility = true)
         val result = service.resolveConflict(local, remote)
-        assertTrue(result is SyncResult.Conflict)
+        assertTrue(result is SyncResult.Conflict<*>)
         val conflict = result as SyncResult.Conflict<RelationshipSettingsSnapshot>
         assertEquals(remote, conflict.remote)
     }
