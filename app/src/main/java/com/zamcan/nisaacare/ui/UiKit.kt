@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.RippleDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -69,13 +71,19 @@ object NisaaDesign {
     fun card(context: Context, paddingDp: Int = 18): LinearLayout = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         setPadding(dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp))
-        background = rounded(context, color(context, R.color.nisaa_surface), color(context, R.color.nisaa_line), 20)
-        elevation = dp(context, 1).toFloat()
+        background = rounded(context, color(context, R.color.nisaa_surface), color(context, R.color.nisaa_line), 16)
+        elevation = dp(context, 3).toFloat()
+        translationZ = dp(context, 1).toFloat()
         isFocusable = true
+        foreground = RippleDrawable(
+            ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)),
+            null,
+            rounded(context, Color.TRANSPARENT, null, 16)
+        )
     }
 
     fun softCard(context: Context, paddingDp: Int = 18): LinearLayout = card(context, paddingDp).apply {
-        background = rounded(context, color(context, R.color.nisaa_surface_alt), null, 20)
+        background = rounded(context, color(context, R.color.nisaa_surface_alt), color(context, R.color.nisaa_line), 16)
     }
 
     fun primaryButton(
@@ -88,7 +96,8 @@ object NisaaDesign {
         gravity = Gravity.CENTER
         minimumHeight = dp(context, 50)
         setPadding(dp(context, 18), dp(context, 8), dp(context, 18), dp(context, 8))
-        background = rounded(context, color(context, R.color.nisaa_rose), null, 16)
+        background = rounded(context, color(context, R.color.nisaa_rose), null, 14)
+        elevation = dp(context, 2).toFloat()
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -110,7 +119,7 @@ object NisaaDesign {
         gravity = Gravity.CENTER
         minimumHeight = dp(context, 50)
         setPadding(dp(context, 18), dp(context, 8), dp(context, 18), dp(context, 8))
-        background = rounded(context, color(context, R.color.nisaa_rose_soft), color(context, R.color.nisaa_rose), 16)
+        background = rounded(context, color(context, R.color.nisaa_rose_soft), color(context, R.color.nisaa_rose), 14)
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -132,7 +141,7 @@ object NisaaDesign {
         gravity = Gravity.CENTER
         minimumHeight = dp(context, 48)
         setPadding(dp(context, 16), dp(context, 6), dp(context, 16), dp(context, 6))
-        background = rounded(context, Color.TRANSPARENT, color(context, R.color.nisaa_line), 16)
+        background = rounded(context, Color.TRANSPARENT, color(context, R.color.nisaa_line), 14)
         isClickable = true
         isFocusable = true
         contentDescription = label
