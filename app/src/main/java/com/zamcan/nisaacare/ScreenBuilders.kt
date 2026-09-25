@@ -495,6 +495,17 @@ internal fun MainActivity.buildHealthScreen(): View = standardScreen(getString(R
 }
 
 internal fun MainActivity.buildFaithScreen(): View = standardScreen(getString(R.string.faith_title)) { body ->
+    addSpaced(
+        body,
+        NisaaDesign.heroCard(
+            this,
+            getString(R.string.faith_title),
+            getString(R.string.app_name),
+            getString(R.string.faith_intro),
+            R.drawable.nisaa_hero_faith
+        ),
+        14
+    )
     cardTitle(body, getString(R.string.faith_title), getString(R.string.faith_intro))
     val worship = infoCard(getString(R.string.worship_context_title), getString(R.string.worship_context_body), R.drawable.ic_faith, soft = true)
     addSpaced(body, worship, 0)
