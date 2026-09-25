@@ -185,6 +185,9 @@ data class ContentVersion(
 
 data class CycleInsight(
     val referenceDate: LocalDate,
+    val cycleDay: Int? = null,
+    val currentPhase: CyclePhase = CyclePhase.UNKNOWN,
+    val dataQuality: DataQuality = DataQuality.INSUFFICIENT,
     val observedCycleCount: Int,
     val averageCycleLength: Int?,
     val variabilityDays: Int?,
@@ -197,6 +200,21 @@ data class CycleInsight(
     val calculationVersion: String = BiologicalEngineVersion.CURRENT,
     val guidance: String = "Estimates only; they cannot prevent pregnancy."
 )
+
+enum class CyclePhase {
+    MENSTRUATION,
+    FOLLICULAR,
+    OVULATION_ESTIMATE,
+    LUTEAL,
+    UNKNOWN
+}
+
+enum class DataQuality {
+    INSUFFICIENT,
+    DEVELOPING,
+    ESTABLISHED,
+    VARIABLE
+}
 
 data class DomainError(val code: String, val message: String)
 
