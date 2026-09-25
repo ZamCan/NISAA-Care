@@ -31,8 +31,8 @@ class BiologicalEngineTest {
         assertEquals(0, insight.variabilityDays)
         assertEquals(LocalDate.parse("2025-03-26"), insight.predictedPeriodStart)
         assertEquals(Confidence.MODERATE, insight.confidence)
-        assertEquals(28, insight.cycleDay)
-        assertEquals(CyclePhase.FOLLICULAR, insight.currentPhase)
+        assertEquals(4, insight.cycleDay)
+        assertEquals(CyclePhase.MENSTRUATION, insight.currentPhase)
         assertEquals(DataQuality.DEVELOPING, insight.dataQuality)
         assertEquals("nisaa-biological-1.0.0", insight.calculationVersion)
     }
