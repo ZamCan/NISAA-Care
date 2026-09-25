@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/nisaa_rose_dark" android:pathData="M5,4C8,3.4 10.2,4.1 12,5.2V20C10.2,18.9 8,18.2 5,18.8Z"/>
+    <path android:fillColor="@color/nisaa_terracotta" android:pathData="M19,4C16,3.4 13.8,4.1 12,5.2V20C13.8,18.9 16,18.2 19,18.8Z"/>
+    <path android:fillColor="@color/nisaa_cream" android:pathData="M6.5,6.2C8.5,6.1 10,6.5 11,7V17.7C9.5,17.1 8.1,16.8 6.5,17Z M17.5,6.2C15.5,6.1 14,6.5 13,7V17.7C14.5,17.1 15.9,16.8 17.5,17Z"/>
+</vector>
