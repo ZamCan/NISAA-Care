@@ -818,6 +818,17 @@ internal fun MainActivity.buildHusbandPrivateNotice(): View = standardScreen(get
 }
 
 internal fun MainActivity.buildHusbandHome(): View = standardScreen(getString(R.string.husband_title)) { body ->
+    addSpaced(
+        body,
+        NisaaDesign.heroCard(
+            this,
+            getString(R.string.husband_title),
+            getString(R.string.app_name),
+            getString(R.string.husband_permission_required),
+            R.drawable.nisaa_hero_family
+        ),
+        14
+    )
     addSpaced(body, NisaaDesign.softCard(this, 20).apply {
         addView(NisaaDesign.icon(this@buildHusbandHome, R.drawable.ic_relationship, R.color.nisaa_rose, 30))
         addView(NisaaDesign.space(this@buildHusbandHome, 0, 10))
