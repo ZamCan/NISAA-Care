@@ -246,4 +246,20 @@
     <string name="confirmation_title">Tafadhali thibitisha</string>
     <string name="confirmation_revoke">Hii itaondoa ufikiaji kwenye kifaa hiki.</string>
     <string name="confirm_revoke">Ghairi</string>
+
+    <string name="cycle_day_label">Siku ya mzunguko</string>
+    <string name="cycle_day_format">Siku ya %1$d</string>
+    <string name="cycle_phase_label">Hatua ya sasa</string>
+    <string name="phase_menstruation">Hedhi</string>
+    <string name="phase_follicular">Hatua ya follicular</string>
+    <string name="phase_ovulation">Makadirio ya ovulation</string>
+    <string name="phase_luteal">Hatua ya luteal</string>
+    <string name="phase_unknown">Taarifa hazitoshi</string>
+    <string name="data_quality_label">Ubora wa muundo</string>
+    <string name="data_quality_insufficient">Haitoshi</string>
+    <string name="data_quality_developing">Inaendelea kujengeka</string>
+    <string name="data_quality_established">Imejengeka</string>
+    <string name="data_quality_variable">Inabadilika</string>
+    <string name="care_review_title">Muundo unaofaa kuangaliwa</string>
+    <string name="care_review_body">Baadhi ya taarifa ulizorekodi zinaweza kuwa sababu ya kuzungumza na mtaalamu wa afya, hasa zikidumu, kuongezeka, au kuathiri maisha ya kila siku.</string>
 </resources>
