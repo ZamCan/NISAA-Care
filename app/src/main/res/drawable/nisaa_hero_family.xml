@@ -3,8 +3,8 @@
     android:width="320dp" android:height="220dp" android:viewportWidth="320" android:viewportHeight="220">
     <path android:fillColor="#F5E9D2" android:pathData="M0,0L320,0L320,220L0,220Z"/>
     <path android:fillColor="#E2ECE5" android:pathData="M0,164C42,132 81,135 112,158C142,180 169,180 198,157C225,136 270,133 320,160L320,220L0,220Z"/>
-    <circle android:fillColor="#A65363" android:alpha="0.16" android:cx="72" android:cy="65" android:r="48"/>
-    <circle android:fillColor="#BF6A4E" android:alpha="0.14" android:cx="258" android:cy="62" android:r="58"/>
+    <circle android:fillColor="#A65363" android:alpha="0.16"/>
+    <circle android:fillColor="#BF6A4E" android:alpha="0.14"/>
     <path android:fillColor="#A65363" android:pathData="M77,143C78,112 90,91 111,84C127,79 141,87 145,102C148,114 143,127 133,137C126,144 121,151 119,166L89,166C88,155 84,148 77,143Z"/>
     <path android:fillColor="#FCF8F4" android:pathData="M100,101C109,91 122,91 130,100C134,104 135,110 134,115C128,109 120,108 114,112C108,116 105,122 103,129C98,122 97,111 100,101Z"/>
     <path android:fillColor="#6C8375" android:pathData="M171,151C171,119 185,98 207,91C222,87 235,95 240,109C244,122 238,136 228,146C220,154 216,161 214,176L183,176C182,165 179,157 171,151Z"/>
