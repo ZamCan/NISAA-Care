@@ -605,8 +605,9 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
             setPadding(NisaaDesign.dp(this@MainActivity, 8), NisaaDesign.dp(this@MainActivity, 6), NisaaDesign.dp(this@MainActivity, 8), NisaaDesign.dp(this@MainActivity, 8))
             setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_surface))
-            elevation = NisaaDesign.dp(this@MainActivity, 8).toFloat()
-            minimumHeight = NisaaDesign.dp(this@MainActivity, 72)
+            elevation = NisaaDesign.dp(this@MainActivity, 10).toFloat()
+            minimumHeight = NisaaDesign.dp(this@MainActivity, 76)
+            setPadding(NisaaDesign.dp(this@MainActivity, 10), NisaaDesign.dp(this@MainActivity, 7), NisaaDesign.dp(this@MainActivity, 10), NisaaDesign.dp(this@MainActivity, 10))
         }
         nav.addView(navItem(AppScreen.HOME, R.drawable.ic_home, R.string.nav_home))
         nav.addView(navItem(AppScreen.CYCLE, R.drawable.ic_cycle, R.string.nav_cycle))
@@ -765,7 +766,8 @@ class MainActivity : Activity() {
     }
 
     private fun handlePairingIntent(intent: Intent?) {
-        val token = intent?.data?.getQueryParameter("token") ?: return
+        val data = intent?.data ?: return
+        val token = data.getQueryParameter("token") ?: data.getQueryParameter("t") ?: return
         if (token.isNotBlank()) {
             lastInvitation = repository.findInvitation(token)
             if (profile?.onboardingComplete == true) navigate(AppScreen.MARRIAGE)
