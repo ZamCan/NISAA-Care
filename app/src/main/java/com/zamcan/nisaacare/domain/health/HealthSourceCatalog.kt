@@ -16,7 +16,8 @@ data class HealthSource(
 enum class HealthTopic {
     MENSTRUATION, MENSTRUAL_CYCLE, FLOW, COMMON_SYMPTOMS, PAIN,
     EMOTIONAL_WELLBEING, CYCLE_IRREGULARITY, FERTILITY_EDUCATION,
-    SEEK_PROFESSIONAL_CARE, ENDOMETRIOSIS, FIRST_PERIOD, PMS
+    SEEK_PROFESSIONAL_CARE, ENDOMETRIOSIS, FIRST_PERIOD, PMS,
+    PCOS, REPRODUCTIVE_HEALTH, SELF_CARE, MENOPAUSE
 }
 
 object HealthSourceCatalog {
@@ -44,6 +45,18 @@ object HealthSourceCatalog {
             listOf(HealthTopic.FIRST_PERIOD, HealthTopic.MENSTRUATION, HealthTopic.PAIN)),
         HealthSource("ACOG_CHRONIC_PELVIC_PAIN", "American College of Obstetricians and Gynecologists", "Chronic Pelvic Pain",
             "https://www.acog.org/womens-health/faqs/chronic-pelvic-pain",
-            listOf(HealthTopic.PAIN, HealthTopic.ENDOMETRIOSIS, HealthTopic.SEEK_PROFESSIONAL_CARE))
+            listOf(HealthTopic.PAIN, HealthTopic.ENDOMETRIOSIS, HealthTopic.SEEK_PROFESSIONAL_CARE)),
+        HealthSource("WHO_PCOS_2026", "World Health Organization", "Polycystic ovary syndrome (PCOS)",
+            "https://www.who.int/news-room/fact-sheets/detail/polycystic-ovary-syndrome",
+            listOf(HealthTopic.PCOS, HealthTopic.CYCLE_IRREGULARITY, HealthTopic.FERTILITY_EDUCATION, HealthTopic.SEEK_PROFESSIONAL_CARE)),
+        HealthSource("WHO_SRHR_2026", "World Health Organization", "Sexual and reproductive health and rights",
+            "https://www.who.int/health-topics/sexual-and-reproductive-health-and-rights",
+            listOf(HealthTopic.REPRODUCTIVE_HEALTH, HealthTopic.FERTILITY_EDUCATION)),
+        HealthSource("WHO_SELF_CARE_2026", "World Health Organization", "Self-care for health and well-being",
+            "https://www.who.int/news-room/questions-and-answers/item/self-care-for-health-and-well-being",
+            listOf(HealthTopic.SELF_CARE, HealthTopic.SEEK_PROFESSIONAL_CARE)),
+        HealthSource("WHO_MENOPAUSE_2024", "World Health Organization", "Menopause",
+            "https://www.who.int/news-room/fact-sheets/detail/menopause",
+            listOf(HealthTopic.MENOPAUSE, HealthTopic.CYCLE_IRREGULARITY, HealthTopic.SEEK_PROFESSIONAL_CARE))
     )
 }
