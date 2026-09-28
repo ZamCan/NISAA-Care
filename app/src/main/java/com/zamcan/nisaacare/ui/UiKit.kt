@@ -68,6 +68,73 @@ object NisaaDesign {
         typeface = Typeface.create("serif", Typeface.BOLD)
     }
 
+    fun nativeRow(
+        context: Context,
+        title: CharSequence,
+        supporting: CharSequence? = null,
+        iconRes: Int? = null,
+        selected: Boolean = false,
+        onClick: (() -> Unit)? = null
+    ): LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        minimumHeight = dp(context, 64)
+        setPadding(dp(context, 14), dp(context, 8), dp(context, 12), dp(context, 8))
+        background = rounded(
+            context,
+            color(context, if (selected) R.color.nisaa_rose_soft else R.color.nisaa_surface),
+            color(context, if (selected) R.color.nisaa_rose else R.color.nisaa_line),
+            14
+        )
+        isClickable = onClick != null
+        isFocusable = onClick != null
+        if (onClick != null) {
+            foreground = RippleDrawable(
+                ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)),
+                null,
+                rounded(context, Color.TRANSPARENT, null, 14)
+            )
+            setOnClickListener { onClick() }
+        }
+        if (iconRes != null) {
+            addView(icon(context, iconRes, if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink_soft, 22))
+            addView(space(context, 12, 1))
+        }
+        addView(LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(text(context, title, 15f, if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink, selected))
+            if (supporting != null) {
+                addView(space(context, 0, 3))
+                addView(body(context, supporting).apply { textSize = 13f })
+            }
+        }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        if (selected) {
+            addView(icon(context, R.drawable.ic_check, R.color.nisaa_rose, 20))
+        } else if (onClick != null) {
+            addView(icon(context, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 18))
+        }
+    }
+
+    fun topBar(
+        context: Context,
+        title: CharSequence,
+        subtitle: CharSequence? = null,
+        action: View? = null
+    ): LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        setPadding(dp(context, 20), dp(context, 12), dp(context, 16), dp(context, 10))
+        addView(LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(serif(context, title, 23f).apply { maxLines = 1 })
+            if (subtitle != null) {
+                addView(space(context, 0, 2))
+                addView(body(context, subtitle).apply { textSize = 12.5f })
+            }
+        }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        if (action != null) addView(action)
+    }
+
     fun card(context: Context, paddingDp: Int = 18): LinearLayout = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         setPadding(dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp))
