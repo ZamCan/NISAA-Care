@@ -1,10 +1,5 @@
 package com.zamcan.nisaacare.domain.health
 
-/**
- * External clinical sources used for editorial review. These are source records,
- * not runtime diagnostic rules. Published educational content must be reviewed
- * before it enters the bundled knowledge set.
- */
 data class HealthSource(
     val id: String,
     val publisher: String,
@@ -13,18 +8,14 @@ data class HealthSource(
     val useFor: List<HealthTopic>
 )
 
-enum class HealthTopic {
-    MENSTRUATION, MENSTRUAL_CYCLE, FLOW, COMMON_SYMPTOMS, PAIN,
-    EMOTIONAL_WELLBEING, CYCLE_IRREGULARITY, FERTILITY_EDUCATION,
-    SEEK_PROFESSIONAL_CARE, ENDOMETRIOSIS, FIRST_PERIOD, PMS,
-    PCOS, REPRODUCTIVE_HEALTH, SELF_CARE, MENOPAUSE
-}
-
 object HealthSourceCatalog {
     val sources: List<HealthSource> = listOf(
         HealthSource("WHO_MENSTRUAL_HEALTH_2026", "World Health Organization", "Menstrual health",
             "https://www.who.int/news-room/fact-sheets/detail/menstrual-health",
             listOf(HealthTopic.MENSTRUATION, HealthTopic.MENSTRUAL_CYCLE, HealthTopic.FLOW, HealthTopic.COMMON_SYMPTOMS, HealthTopic.EMOTIONAL_WELLBEING, HealthTopic.SEEK_PROFESSIONAL_CARE)),
+        HealthSource("WHO_REPRODUCTIVE_PHYSIOLOGY_2014", "World Health Organization", "Reproductive physiology",
+            "https://platform.who.int/docs/default-source/mca-documents/policy-documents/guideline/BTN-RH-54-01-GUIDELINE-2014-eng-Infertility-Prevention-and-Management-2014.pdf",
+            listOf(HealthTopic.MENSTRUAL_CYCLE, HealthTopic.OVULATION, HealthTopic.FERTILITY_EDUCATION)),
         HealthSource("WHO_ENDOMETRIOSIS_2025", "World Health Organization", "Endometriosis",
             "https://www.who.int/news-room/fact-sheets/detail/endometriosis",
             listOf(HealthTopic.ENDOMETRIOSIS, HealthTopic.PAIN, HealthTopic.FLOW, HealthTopic.SEEK_PROFESSIONAL_CARE)),
@@ -46,7 +37,7 @@ object HealthSourceCatalog {
         HealthSource("ACOG_CHRONIC_PELVIC_PAIN", "American College of Obstetricians and Gynecologists", "Chronic Pelvic Pain",
             "https://www.acog.org/womens-health/faqs/chronic-pelvic-pain",
             listOf(HealthTopic.PAIN, HealthTopic.ENDOMETRIOSIS, HealthTopic.SEEK_PROFESSIONAL_CARE)),
-        HealthSource("WHO_PCOS_2026", "World Health Organization", "Polycystic ovary syndrome (PCOS)",
+        HealthSource("WHO_PCOS_2026", "World Health Organization", "Polycystic ovary syndrome",
             "https://www.who.int/news-room/fact-sheets/detail/polycystic-ovary-syndrome",
             listOf(HealthTopic.PCOS, HealthTopic.CYCLE_IRREGULARITY, HealthTopic.FERTILITY_EDUCATION, HealthTopic.SEEK_PROFESSIONAL_CARE)),
         HealthSource("WHO_SRHR_2026", "World Health Organization", "Sexual and reproductive health and rights",
