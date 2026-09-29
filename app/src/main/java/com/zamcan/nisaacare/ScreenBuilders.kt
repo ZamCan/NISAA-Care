@@ -155,9 +155,21 @@ internal fun MainActivity.buildWomanHome(): View {
             getString(R.string.home_today),
             if (name == null) getString(R.string.home_greeting_generic) else getString(R.string.home_greeting, name),
             getString(R.string.app_tagline),
-            R.drawable.nisaa_hero_wellness
+            R.drawable.nisaa_woman_care
         )
     )
+    body.addView(NisaaDesign.space(this, 0, 14))
+    addSpaced(body, NisaaDesign.softCard(this, 16).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        addView(NisaaDesign.icon(this@buildWomanHome, R.drawable.ic_health, R.color.nisaa_rose, 28))
+        addView(NisaaDesign.space(this@buildWomanHome, 12, 1))
+        addView(NisaaDesign.body(this@buildWomanHome, getString(R.string.home_wellbeing)).apply {
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        })
+        addView(NisaaDesign.icon(this@buildWomanHome, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 20))
+        setOnClickListener { navigate(AppScreen.HEALTH) }
+    }, 4)
     body.addView(NisaaDesign.space(this, 0, 18))
 
     val insight = calculateInsight()
