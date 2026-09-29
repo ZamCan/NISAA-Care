@@ -119,3 +119,18 @@ The enterprise signal comes from:
 - tested error paths
 - versioned domain logic
 - controlled content updates
+
+
+## Circular biological visual language
+
+Cycle information is presented as a native visual system rather than a web calendar:
+- circular day states for recorded menstruation, fertile-window estimates and other estimates
+- a restrained cycle-progress ring for current cycle day and phase
+- today's date receives a quiet outer marker rather than a large tile
+- colour is semantic and repeated in legends and biological summaries
+- selected dates use an outer ring, not a heavy rectangular highlight
+- the visual system remains understandable in Swahili, English and Arabic, including RTL layouts
+
+## Women-care visual identity
+
+NISAA CARE uses original vector artwork to symbolise care, dignity, continuity and wellbeing. Artwork is density-independent Android vector content, not a static screenshot, and is kept secondary to real health tasks so the interface remains calm and professional.
