@@ -246,6 +246,8 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     val insight = calculateInsight()
     val summary = NisaaDesign.card(this, 18)
     if (insight.lastPeriodStart == null) {
+        summary.addView(NisaaDesign.icon(this, R.drawable.nisaa_woman_care, R.color.nisaa_rose, 54))
+        summary.addView(NisaaDesign.space(this, 0, 8))
         summary.addView(NisaaDesign.text(this, getString(R.string.cycle_no_records), 18f, R.color.nisaa_ink, true))
         summary.addView(NisaaDesign.space(this, 0, 12))
         summary.addView(NisaaDesign.primaryButton(this, getString(R.string.cycle_add_record), R.drawable.ic_add) {
@@ -253,11 +255,15 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
             navigate(AppScreen.CYCLE_ENTRY)
         })
     } else {
+        val ring = com.zamcan.nisaacare.ui.CycleRingView(this).apply {
+            day = insight.cycleDay
+            cycleLength = insight.averageCycleLength
+            phase = phaseLabel(insight.currentPhase)
+        }
+        summary.addView(ring, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 190)))
         summary.addView(NisaaDesign.body(this, getString(R.string.last_period_start, dateText(insight.lastPeriodStart))))
-        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.cycle_day_label), insight.cycleDay?.let { getString(R.string.cycle_day_format, it) } ?: getString(R.string.optional)), 10)
-        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.cycle_phase_label), phaseLabel(insight.currentPhase)), 10)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.data_quality_label), dataQualityLabel(insight.dataQuality)), 10)
-        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.predicted_period_start), dateText(insight.predictedPeriodStart)), 12)
+        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.predicted_period_start), dateText(insight.predictedPeriodStart)), 10)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.confidence_low), confidenceLabel(insight.confidence)), 10)
     }
     addSpaced(body, summary, 0)
@@ -282,6 +288,13 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     }
     val recordedPeriodDates = periodDates
     val patternDates = estimatedDates
+    val fertileDates = buildSet {
+        if (insight.fertileWindowStart != null && insight.fertileWindowEnd != null) {
+            addAll(generateSequence(insight.fertileWindowStart) { d -> d.plusDays(1) }
+                .takeWhile { it <= insight.fertileWindowEnd }
+                .toList())
+        }
+    }
     val calendarCard = NisaaDesign.card(this, 14)
     val calendarHeader = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
     calendarHeader.addView(NisaaDesign.text(this, getString(R.string.cycle_calendar), 18f, R.color.nisaa_ink, true).apply {
@@ -299,7 +312,8 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     val calendar = NisaaCalendarView(this, resources.configuration.locales[0]).apply {
         showMonth(this@buildCycleScreen.calendarMonth)
         this.periodDates = recordedPeriodDates
-        this.estimatedDates = patternDates
+        this.fertileDates = fertileDates
+        this.estimatedDates = patternDates - fertileDates
         contentDescription = getString(R.string.cycle_calendar)
         onDateSelected = { date ->
             selectedCycleStart = date
@@ -309,11 +323,21 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
             navigate(AppScreen.CYCLE_ENTRY)
         }
     }
-    calendarCard.addView(calendar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 400)))
-    val legends = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-    legends.addView(NisaaDesign.statusPill(this, getString(R.string.calendar_period_legend), false))
-    legends.addView(NisaaDesign.space(this, 8, 1))
-    legends.addView(NisaaDesign.statusPill(this, getString(R.string.calendar_predicted_legend), true))
+    calendarCard.addView(calendar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 360)))
+    val legends = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        weightSum = 3f
+    }
+    val legendPeriod = NisaaDesign.statusPill(this, getString(R.string.calendar_period_legend), false)
+    legendPeriod.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+    legends.addView(legendPeriod)
+    val legendFertile = NisaaDesign.statusPill(this, getString(R.string.calendar_fertile_legend), true)
+    legendFertile.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+    legends.addView(legendFertile)
+    val legendEstimate = NisaaDesign.statusPill(this, getString(R.string.calendar_predicted_legend), true)
+    legendEstimate.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+    legends.addView(legendEstimate)
     calendarCard.addView(legends)
     addSpaced(body, calendarCard, 20)
 
