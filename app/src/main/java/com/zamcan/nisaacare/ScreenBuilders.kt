@@ -29,9 +29,13 @@ import com.zamcan.nisaacare.domain.model.PermissionKey
 import com.zamcan.nisaacare.domain.model.Relationship
 import com.zamcan.nisaacare.domain.model.ReviewState
 import com.zamcan.nisaacare.domain.model.UserRole
+import com.zamcan.nisaacare.domain.health.HealthSourceCatalog
+import com.zamcan.nisaacare.domain.health.MenstrualLearningCatalog
+import com.zamcan.nisaacare.domain.islamic.MenstruationFaithCatalog
 import com.zamcan.nisaacare.ui.NisaaCalendarView
 import com.zamcan.nisaacare.ui.NisaaDesign
 import com.zamcan.nisaacare.ui.PatternView
+import com.zamcan.nisaacare.ui.MenstrualScienceDiagramView
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -655,7 +659,7 @@ internal fun MainActivity.buildFaithScreen(): View = standardScreen(getString(R.
     careCard.addView(NisaaDesign.body(this, getString(R.string.worship_context_body)))
     addSpaced(body, careCard, 10)
 
-    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.hayd_title)))
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.topic_hayd)))
     MenstruationFaithCatalog.lessons.forEach { lesson ->
         val card = NisaaDesign.card(this, 18)
         card.addView(NisaaDesign.text(this, lesson.titleFor(language), 18f, R.color.nisaa_ink, true))
