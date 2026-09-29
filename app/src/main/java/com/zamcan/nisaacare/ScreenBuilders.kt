@@ -555,34 +555,118 @@ private fun MainActivity.saveCycleFromEntry(notes: String) {
 }
 
 internal fun MainActivity.buildHealthScreen(): View = standardScreen(getString(R.string.health_title)) { body ->
-    cardTitle(body, getString(R.string.health_title), getString(R.string.health_intro))
-    SeedContent.health.forEach { topic ->
-        addSpaced(body, topicCard(topic), 10)
+    addSpaced(body, NisaaDesign.heroCard(
+        this,
+        getString(R.string.health_title),
+        getString(R.string.app_name),
+        getString(R.string.health_intro),
+        R.drawable.nisaa_woman_care
+    ), 0)
+
+    val language = LocaleManager.savedLanguage(this)
+    val cycleLesson = MenstrualLearningCatalog.lessons.first { it.id == "cycle_map" }
+    val mapCard = NisaaDesign.card(this, 20)
+    mapCard.addView(NisaaDesign.eyebrow(this, cycleLesson.titleFor(language)))
+    mapCard.addView(NisaaDesign.space(this, 0, 8))
+    mapCard.addView(MenstrualScienceDiagramView(this, cycleLesson.visual).apply {
+        contentDescription = cycleLesson.titleFor(language)
+    }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 190)))
+    mapCard.addView(NisaaDesign.space(this, 0, 7))
+    mapCard.addView(NisaaDesign.body(this, cycleLesson.bodyFor(language)))
+    addSpaced(body, mapCard, 12)
+
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.health_title)))
+    MenstrualLearningCatalog.lessons.filter { it.id != "cycle_map" }.forEach { lesson ->
+        addSpaced(body, learningLessonCard(lesson, language), 10)
     }
+
+    val sourcesCard = NisaaDesign.card(this, 18)
+    sourcesCard.addView(NisaaDesign.eyebrow(this, getString(R.string.sources_title)))
+    sourcesCard.addView(NisaaDesign.space(this, 0, 8))
+    sourcesCard.addView(NisaaDesign.body(this, getString(R.string.sources_body)))
+    HealthSourceCatalog.sources.take(8).forEach { source ->
+        val row = NisaaDesign.card(this, 12).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(source.url)))
+            }
+            addView(NisaaDesign.text(this@buildHealthScreen, source.publisher, 12f, R.color.nisaa_ink_soft, true))
+            addView(NisaaDesign.space(this@buildHealthScreen, 8, 1))
+            addView(NisaaDesign.body(this@buildHealthScreen, source.title).apply {
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            })
+            addView(NisaaDesign.icon(this@buildHealthScreen, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 18))
+        }
+        sourcesCard.addView(row)
+        sourcesCard.addView(NisaaDesign.space(this, 0, 6))
+    }
+    addSpaced(body, sourcesCard, 18)
+
     addSpaced(body, NisaaDesign.softCard(this, 18).apply {
         addView(NisaaDesign.icon(this@buildHealthScreen, R.drawable.ic_lock, R.color.nisaa_rose, 26))
         addView(NisaaDesign.space(this@buildHealthScreen, 0, 8))
         addView(NisaaDesign.body(this@buildHealthScreen, getString(R.string.home_health_disclaimer)))
-    }, 20)
+    }, 12)
+}
+
+private fun MainActivity.learningLessonCard(
+    lesson: com.zamcan.nisaacare.domain.health.MenstrualLesson,
+    language: AppLanguage
+): LinearLayout = NisaaDesign.card(this, 18).apply {
+    addView(NisaaDesign.text(this@learningLessonCard, lesson.titleFor(language), 18f, R.color.nisaa_ink, true))
+    addView(NisaaDesign.space(this@learningLessonCard, 0, 7))
+    addView(MenstrualScienceDiagramView(this@learningLessonCard, lesson.visual).apply {
+        contentDescription = lesson.titleFor(language)
+    }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this@learningLessonCard, 174)))
+    addView(NisaaDesign.space(this@learningLessonCard, 0, 8))
+    addView(NisaaDesign.body(this@learningLessonCard, lesson.bodyFor(language)))
+    lesson.takeawaysFor(language).forEach { takeaway ->
+        addView(NisaaDesign.space(this@learningLessonCard, 0, 7))
+        addView(NisaaDesign.dividerLabel(this@learningLessonCard, "•", takeaway))
+    }
+    addView(NisaaDesign.space(this@learningLessonCard, 0, 9))
+    addView(NisaaDesign.text(
+        this@learningLessonCard,
+        lesson.sourceIds.joinToString("  •  "),
+        10f,
+        R.color.nisaa_ink_soft,
+        true
+    ))
 }
 
 internal fun MainActivity.buildFaithScreen(): View = standardScreen(getString(R.string.faith_title)) { body ->
-    addSpaced(
-        body,
-        NisaaDesign.heroCard(
-            this,
-            getString(R.string.faith_title),
-            getString(R.string.app_name),
-            getString(R.string.faith_intro),
-            R.drawable.nisaa_hero_faith
-        ),
-        14
-    )
-    cardTitle(body, getString(R.string.faith_title), getString(R.string.faith_intro))
-    val worship = infoCard(getString(R.string.worship_context_title), getString(R.string.worship_context_body), R.drawable.ic_faith, soft = true)
-    addSpaced(body, worship, 0)
-    val quran = NisaaDesign.sectionTitle(this, getString(R.string.quran_title))
-    body.addView(quran)
+    addSpaced(body, NisaaDesign.heroCard(
+        this,
+        getString(R.string.faith_title),
+        getString(R.string.app_name),
+        getString(R.string.faith_intro),
+        R.drawable.nisaa_hero_faith
+    ), 14)
+
+    val language = LocaleManager.savedLanguage(this)
+    val careCard = NisaaDesign.card(this, 20)
+    careCard.addView(NisaaDesign.eyebrow(this, getString(R.string.worship_context_title)))
+    careCard.addView(NisaaDesign.space(this, 0, 8))
+    careCard.addView(MenstrualScienceDiagramView(this, com.zamcan.nisaacare.domain.health.LearningVisual.CARE_SIGNAL), LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 178)))
+    careCard.addView(NisaaDesign.space(this, 0, 8))
+    careCard.addView(NisaaDesign.body(this, getString(R.string.worship_context_body)))
+    addSpaced(body, careCard, 10)
+
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.hayd_title)))
+    MenstruationFaithCatalog.lessons.forEach { lesson ->
+        val card = NisaaDesign.card(this, 18)
+        card.addView(NisaaDesign.text(this, lesson.titleFor(language), 18f, R.color.nisaa_ink, true))
+        card.addView(NisaaDesign.space(this, 0, 7))
+        card.addView(NisaaDesign.body(this, lesson.bodyFor(language)))
+        card.addView(NisaaDesign.space(this, 0, 8))
+        card.addView(NisaaDesign.dividerLabel(this, lesson.source, lesson.reference))
+        addSpaced(body, card, 9)
+    }
+
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.quran_title)))
     SeedContent.islamic.filter { it.topicKey == "QURAN" }.forEach { addSpaced(body, topicCard(it), 9) }
     body.addView(NisaaDesign.sectionTitle(this, getString(R.string.hadith_title)))
     SeedContent.islamic.filter { it.topicKey == "HADITH" }.forEach { addSpaced(body, topicCard(it), 9) }
