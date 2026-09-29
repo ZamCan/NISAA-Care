@@ -234,7 +234,7 @@ class MainActivity : Activity() {
                 getString(R.string.app_tagline),
                 getString(R.string.app_name),
                 getString(R.string.app_description),
-                R.drawable.nisaa_hero_wellness
+                R.drawable.nisaa_woman_care
             )
         )
         body.addView(NisaaDesign.space(this, 0, 18))
