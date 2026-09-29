@@ -258,7 +258,12 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     val insight = calculateInsight()
     val summary = NisaaDesign.card(this, 18)
     if (insight.lastPeriodStart == null) {
-        summary.addView(NisaaDesign.icon(this, R.drawable.nisaa_woman_care, R.color.nisaa_rose, 54))
+        summary.addView(android.widget.ImageView(this).apply {
+            setImageResource(R.drawable.nisaa_woman_care)
+            scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this@buildCycleScreen, 92))
+        })
         summary.addView(NisaaDesign.space(this, 0, 8))
         summary.addView(NisaaDesign.text(this, getString(R.string.cycle_no_records), 18f, R.color.nisaa_ink, true))
         summary.addView(NisaaDesign.space(this, 0, 12))
