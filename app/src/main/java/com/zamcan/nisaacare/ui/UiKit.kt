@@ -54,6 +54,8 @@ object NisaaDesign {
         textSize = sizeSp
         setTextColor(color(context, colorRes))
         this.gravity = gravity
+        textDirection = View.TEXT_DIRECTION_LOCALE
+        textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         typeface = Typeface.create("sans", if (bold) Typeface.BOLD else Typeface.NORMAL)
         includeFontPadding = true
         setLineSpacing(dp(context, 3).toFloat(), 1f)
@@ -139,8 +141,8 @@ object NisaaDesign {
         orientation = LinearLayout.VERTICAL
         setPadding(dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp))
         background = rounded(context, color(context, R.color.nisaa_surface), color(context, R.color.nisaa_line), 16)
-        elevation = dp(context, 3).toFloat()
-        translationZ = dp(context, 1).toFloat()
+        elevation = dp(context, 1).toFloat()
+        translationZ = dp(context, 0).toFloat()
         isFocusable = true
         foreground = RippleDrawable(
             ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)),
@@ -164,7 +166,8 @@ object NisaaDesign {
         minimumHeight = dp(context, 50)
         setPadding(dp(context, 18), dp(context, 8), dp(context, 18), dp(context, 8))
         background = rounded(context, color(context, R.color.nisaa_rose), null, 14)
-        elevation = dp(context, 2).toFloat()
+        elevation = dp(context, 1).toFloat()
+        foreground = RippleDrawable(ColorStateList.valueOf(color(context, R.color.nisaa_rose_dark)), null, rounded(context, Color.TRANSPARENT, null, 14))
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -187,6 +190,7 @@ object NisaaDesign {
         minimumHeight = dp(context, 50)
         setPadding(dp(context, 18), dp(context, 8), dp(context, 18), dp(context, 8))
         background = rounded(context, color(context, R.color.nisaa_rose_soft), color(context, R.color.nisaa_rose), 14)
+        foreground = RippleDrawable(ColorStateList.valueOf(color(context, R.color.nisaa_surface)), null, rounded(context, Color.TRANSPARENT, null, 14))
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -209,6 +213,7 @@ object NisaaDesign {
         minimumHeight = dp(context, 48)
         setPadding(dp(context, 16), dp(context, 6), dp(context, 16), dp(context, 6))
         background = rounded(context, Color.TRANSPARENT, color(context, R.color.nisaa_line), 14)
+        foreground = RippleDrawable(ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)), null, rounded(context, Color.TRANSPARENT, null, 14))
         isClickable = true
         isFocusable = true
         contentDescription = label
