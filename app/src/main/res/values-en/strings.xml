@@ -262,4 +262,5 @@
     <string name="data_quality_variable">Variable</string>
     <string name="care_review_title">A pattern worth reviewing</string>
     <string name="care_review_body">Some logged observations can be worth discussing with a qualified health professional, especially if they persist, worsen, or affect daily life.</string>
+    <string name="calendar_fertile_legend">Fertile window</string>
 </resources>
