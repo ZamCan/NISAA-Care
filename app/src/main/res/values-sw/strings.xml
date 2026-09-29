@@ -262,4 +262,5 @@
     <string name="data_quality_variable">Inabadilika</string>
     <string name="care_review_title">Muundo unaofaa kuangaliwa</string>
     <string name="care_review_body">Baadhi ya taarifa ulizorekodi zinaweza kuwa sababu ya kuzungumza na mtaalamu wa afya, hasa zikidumu, kuongezeka, au kuathiri maisha ya kila siku.</string>
+    <string name="calendar_fertile_legend">Dirisha la uzazi</string>
 </resources>
