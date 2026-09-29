@@ -262,4 +262,5 @@
     <string name="data_quality_variable">متغيرة</string>
     <string name="care_review_title">نمط يستحق المراجعة</string>
     <string name="care_review_body">قد تستحق بعض الملاحظات المسجلة مناقشتها مع مختص صحي مؤهل، خاصة إذا استمرت أو ازدادت أو أثرت في الحياة اليومية.</string>
+    <string name="calendar_fertile_legend">نافذة الخصوبة</string>
 </resources>
