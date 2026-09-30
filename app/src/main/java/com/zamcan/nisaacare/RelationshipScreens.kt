@@ -20,6 +20,7 @@ import com.zamcan.nisaacare.domain.model.RelationshipPermissions
 import com.zamcan.nisaacare.domain.model.RelationshipStatus
 import com.zamcan.nisaacare.domain.model.SupportRequest
 import com.zamcan.nisaacare.domain.model.UserRole
+import com.zamcan.nisaacare.domain.relationship.PairingExchange
 import com.zamcan.nisaacare.ui.NisaaDesign
 import java.util.UUID
 
@@ -174,7 +175,12 @@ private fun MainActivity.createInvitation() {
 }
 
 private fun MainActivity.shareInvitation(invitation: PairingInvitation) {
-    val message = getString(R.string.pairing_share_message, getString(R.string.app_name), "nisaacare://pair?token=" + invitation.token)
+    val link = PairingExchange.payload(
+        token = invitation.token,
+        inviterRole = invitation.inviterRole.name,
+        expiresAt = invitation.expiresAt
+    ).encode()
+    val message = getString(R.string.pairing_share_message, getString(R.string.app_name), link)
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/?text=" + Uri.encode(message)))
     try {
         startActivity(intent)
