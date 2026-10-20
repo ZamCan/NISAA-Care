@@ -27,6 +27,12 @@ import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import com.zamcan.nisaacare.core.ads.AdProvider
+import com.zamcan.nisaacare.core.ads.AdProviderFactory
+import com.zamcan.nisaacare.core.ads.AdsConsent
+import com.zamcan.nisaacare.core.ads.AdsConsentStore
+import com.zamcan.nisaacare.core.ads.AdsConfiguration
+import com.zamcan.nisaacare.core.ads.InterstitialPolicy
 import com.zamcan.nisaacare.core.localization.LocaleManager
 import com.zamcan.nisaacare.core.notifications.NotificationScheduler
 import com.zamcan.nisaacare.data.content.SeedContent
@@ -48,6 +54,9 @@ import com.zamcan.nisaacare.domain.model.Relationship
 import com.zamcan.nisaacare.domain.model.RelationshipStatus
 import com.zamcan.nisaacare.domain.model.UserProfile
 import com.zamcan.nisaacare.domain.model.UserRole
+import com.zamcan.nisaacare.ui.AdaptiveLayout
+import com.zamcan.nisaacare.ui.AdaptiveNavigationShell
+import com.zamcan.nisaacare.ui.Glass
 import com.zamcan.nisaacare.ui.NisaaDesign
 import com.zamcan.nisaacare.ui.PatternView
 import java.time.LocalDate
@@ -80,6 +89,30 @@ class MainActivity : Activity() {
     internal lateinit var biologicalEngine: BiologicalEngine
     internal lateinit var contentEngine: ContentEngine
     internal lateinit var notificationScheduler: NotificationScheduler
+
+    /**
+     * Advertising consent store.
+     *
+     * Present in every build, including builds with no advertising. The store
+     * simply records a decision that a default build never acts on.
+     */
+    internal val adsConsentStore: AdsConsentStore by lazy { AdsConsentStore(this) }
+
+    /**
+     * Advertising provider for this build.
+     *
+     * Resolves to the AdMob implementation when advertising is enabled and
+     * configured, and to a no-op otherwise. Call sites never branch on it.
+     */
+    internal val adProvider: AdProvider by lazy { AdProviderFactory.create(this) }
+
+    /**
+     * Rate limiting for interstitials.
+     *
+     * Keeps an ad from appearing on every navigation, which is what separates a
+     * timely ad from an intrusive one.
+     */
+    internal val interstitialPolicy: InterstitialPolicy = InterstitialPolicy()
 
     internal var profile: UserProfile? = null
     internal var preferences: AppPreferences = AppPreferences("local")
@@ -124,6 +157,17 @@ class MainActivity : Activity() {
         configureSystemBars()
         handlePairingIntent(intent)
         render()
+        // The consent sheet is presented after onboarding completes, so the user
+        // is not asked about advertising before they have seen the app. It is
+        // a no-op in builds without advertising.
+        window.decorView.post {
+            if (profile?.onboardingComplete == true) {
+                AdsConsentPresenter.showIfNeeded(this, adsConsentStore)
+            }
+        }
+        // The SDK is only initialised after a recorded opt-in, so a user who
+        // never consented never has the advertising code activated.
+        initialiseAdsIfConsented()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -180,7 +224,12 @@ class MainActivity : Activity() {
 
     private fun renderOnboarding() {
         val root = FrameLayout(this).apply {
-            setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream))
+            // Aurora backdrop: one shared layer per screen, so every glass panel
+            // has coloured, varying content to refract.
+            addView(
+                NisaaDesign.screenBackdrop(this@MainActivity),
+                FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            )
             prepareEdgeToEdgeRoot(this)
         }
         val scroll = NisaaDesign.screenScroll(this)
@@ -562,19 +611,65 @@ class MainActivity : Activity() {
 
     private fun renderShell() {
         val root = FrameLayout(this).apply {
-            setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream))
+            addView(
+                NisaaDesign.screenBackdrop(this@MainActivity),
+                FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            )
             prepareEdgeToEdgeRoot(this)
         }
         val shell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_cream))
+            // Transparent: the backdrop is already painted on the root. Giving the
+            // shell an opaque fill here would cover it and flatten the glass.
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
         }
         val content = FrameLayout(this)
         shell.addView(content, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
-        shell.addView(buildBottomNavigation())
+        shell.addView(
+            buildBottomNavigation(),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        )
         root.addView(shell, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         setContentView(root)
         renderCurrentScreen(content)
+    }
+
+    /**
+     * Navigation container.
+     *
+     * The destinations and their order are identical for every window size; only
+     * the presentation changes. On a compact window this is a floating glass
+     * bottom bar. On an expanded window it becomes a side rail, because a bottom
+     * bar on a large screen is an unreasonable reach and wastes the vertical
+     * space that made the window large.
+     */
+    private fun buildBottomNavigation(): View {
+        val destinations = listOf(
+            AdaptiveNavigationShell.Destination(R.drawable.ic_home, R.string.nav_home),
+            AdaptiveNavigationShell.Destination(R.drawable.ic_cycle, R.string.nav_cycle),
+            AdaptiveNavigationShell.Destination(R.drawable.ic_faith, R.string.nav_faith),
+            AdaptiveNavigationShell.Destination(R.drawable.ic_relationship, R.string.nav_marriage),
+            AdaptiveNavigationShell.Destination(R.drawable.ic_settings, R.string.nav_settings)
+        )
+        val screens = listOf(
+            AppScreen.HOME, AppScreen.CYCLE, AppScreen.FAITH,
+            AppScreen.MARRIAGE, AppScreen.SETTINGS
+        )
+        return AdaptiveNavigationShell(this, AdaptiveLayout.sizeClass(this)).apply {
+            build(
+                destinations = destinations,
+                isSelected = { destination ->
+                    screens[destinations.indexOf(destination)] == currentScreen
+                },
+                onSelected = { destination ->
+                    val screen = screens[destinations.indexOf(destination)]
+                    if (screen != currentScreen) {
+                        currentScreen = screen
+                        render()
+                    }
+                }
+            )
+        }
     }
 
     private fun renderCurrentScreen(content: FrameLayout) {
@@ -599,49 +694,41 @@ class MainActivity : Activity() {
         content.addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
-    private fun buildBottomNavigation(): View {
-        val nav = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            setPadding(NisaaDesign.dp(this@MainActivity, 8), NisaaDesign.dp(this@MainActivity, 6), NisaaDesign.dp(this@MainActivity, 8), NisaaDesign.dp(this@MainActivity, 8))
-            setBackgroundColor(NisaaDesign.color(this@MainActivity, R.color.nisaa_surface))
-            elevation = NisaaDesign.dp(this@MainActivity, 10).toFloat()
-            minimumHeight = NisaaDesign.dp(this@MainActivity, 76)
-            setPadding(NisaaDesign.dp(this@MainActivity, 10), NisaaDesign.dp(this@MainActivity, 7), NisaaDesign.dp(this@MainActivity, 10), NisaaDesign.dp(this@MainActivity, 10))
-        }
-        nav.addView(navItem(AppScreen.HOME, R.drawable.ic_home, R.string.nav_home))
-        nav.addView(navItem(AppScreen.CYCLE, R.drawable.ic_cycle, R.string.nav_cycle))
-        nav.addView(navItem(AppScreen.FAITH, R.drawable.ic_faith, R.string.nav_faith))
-        nav.addView(navItem(AppScreen.MARRIAGE, R.drawable.ic_relationship, R.string.nav_marriage))
-        nav.addView(navItem(AppScreen.SETTINGS, R.drawable.ic_settings, R.string.nav_settings))
-        return nav
-    }
-
-    private fun navItem(screen: AppScreen, iconRes: Int, labelRes: Int): View {
-        val selected = currentScreen == screen
-        val item = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            isClickable = true
-            isFocusable = true
-            contentDescription = getString(labelRes)
-            setOnClickListener { currentScreen = screen; render() }
-            if (selected) background = NisaaDesign.rounded(this@MainActivity, NisaaDesign.color(this@MainActivity, R.color.nisaa_rose_soft), null, 16)
-        }
-        val icon = NisaaDesign.icon(this, iconRes, if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink_soft, 22)
-        item.addView(icon)
-        item.addView(NisaaDesign.space(this, 0, 3))
-        item.addView(NisaaDesign.text(this, getString(labelRes), 10f, if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink_soft, selected, Gravity.CENTER))
-        return item.apply {
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply {
-                setMargins(NisaaDesign.dp(this@MainActivity, 2), 0, NisaaDesign.dp(this@MainActivity, 2), 0)
-            }
-        }
-    }
-
     internal fun navigate(screen: AppScreen) {
         currentScreen = screen
+        interstitialPolicy.onNavigation()
+        maybeShowInterstitial()
         render()
+    }
+
+    /**
+     * Shows an interstitial at a natural break, if one is due.
+     *
+     * The conditions are all checked here rather than in the provider, because
+     * the decision needs both the app state and the rate limit:
+     *
+     *  - the user opted in,
+     *  - enough navigations have happened since the last ad,
+     *  - enough time has passed since the last ad,
+     *  - and the destination is not a reading screen.
+     *
+     * When any of these fail the user simply continues, with no delay and no
+     * visible indication that an ad was considered.
+     */
+    private fun maybeShowInterstitial() {
+        if (!AdsConfiguration.enabled) return
+        if (adsConsentStore.current() != AdsConsent.GRANTED) return
+        if (!adProvider.isAvailable) return
+        if (currentScreen == AppScreen.TOPIC || currentScreen == AppScreen.QUOTATION) return
+        if (!interstitialPolicy.canShow(System.currentTimeMillis())) return
+
+        adProvider.loadInterstitial(this)
+        val shown = adProvider.showInterstitial(this) {
+            // Nothing to do on dismissal; the screen is already rendered.
+        }
+        if (shown) {
+            interstitialPolicy.onShown(System.currentTimeMillis())
+        }
     }
 
     internal fun dateText(date: LocalDate?): String = date?.format(dateFormatter) ?: getString(R.string.optional)

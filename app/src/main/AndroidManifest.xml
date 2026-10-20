@@ -15,6 +15,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!--
+            AdMob application ID. Injected from a build property and empty in a
+            default build, so no advertising account identifier is committed to
+            the repository and the SDK cannot initialise unless the build
+            explicitly enables advertising.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

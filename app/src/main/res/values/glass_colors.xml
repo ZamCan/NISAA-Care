@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Glassmorphic layer.
+
+    These colours are deliberately stored separately from colors.xml so the
+    translucency contract stays auditable. Every "glass" fill is a partially
+    transparent colour: the glass effect comes from real alpha compositing over
+    the aurora backdrop, not from a pale opaque surface.
+
+    Alphas follow one rule so stacked surfaces never turn muddy:
+      backdrop      100% (opaque, painted first)
+      glass level 1  62%   glass level 2  74%   glass level 3  84%
+    Each step is roughly +12%, so three stacked cards still read as distinct.
+-->
+<resources>
+    <!-- Backdrop gradients. Painted opaque, bottom-up, in AuroraBackdrop. -->
+    <color name="nisaa_glass_backdrop_base">#FFF7F1F6</color>
+    <color name="nisaa_glass_blob_rose">#FFE8B7C4</color>
+    <color name="nisaa_glass_blob_lilac">#FFD9C7E6</color>
+    <color name="nisaa_glass_blob_sage">#FFC3D8CB</color>
+    <color name="nisaa_glass_blob_gold">#FFEFD6A8</color>
+
+    <!-- Glass fills. Light theme. -->
+    <color name="nisaa_glass_fill_1">#9EFFFFFF</color>
+    <color name="nisaa_glass_fill_2">#BDFFFFFF</color>
+    <color name="nisaa_glass_fill_3">#D6FFFFFF</color>
+
+    <!-- Hairlines. Light theme: brighter than the fill top, darker at the base. -->
+    <color name="nisaa_glass_stroke_top">#B3FFFFFF</color>
+    <color name="nisaa_glass_stroke_bottom">#1F3A2E3C</color>
+    <color name="nisaa_glass_stroke_strong_top">#E6FFFFFF</color>
+    <color name="nisaa_glass_stroke_strong_bottom">#333A2E3C</color>
+
+    <!-- Specular highlight: the light-catching sliver along the top inner edge. -->
+    <color name="nisaa_glass_specular">#4DFFFFFF</color>
+
+    <!-- Backdrop-filtered media wells. -->
+    <color name="nisaa_glass_well">#66FFFFFF</color>
+    <color name="nisaa_glass_well_stroke">#40FFFFFF</color>
+
+    <!-- Scrim for content pinned behind glass bars. -->
+    <color name="nisaa_glass_bar_scrim">#59FFFFFF</color>
+</resources>

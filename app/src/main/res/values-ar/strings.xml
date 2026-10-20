@@ -263,4 +263,19 @@
     <string name="care_review_title">نمط يستحق المراجعة</string>
     <string name="care_review_body">قد تستحق بعض الملاحظات المسجلة مناقشتها مع مختص صحي مؤهل، خاصة إذا استمرت أو ازدادت أو أثرت في الحياة اليومية.</string>
     <string name="calendar_fertile_legend">نافذة الخصوبة</string>
+
+    <!-- Advertising consent. Shown only when advertising is enabled in the build. -->
+    <string name="ads_consent_eyebrow">اختياري</string>
+    <string name="ads_consent_title">ادعم NISAA CARE عبر الإعلانات</string>
+    <string name="ads_consent_body">يعمل NISAA CARE دون اتصال بالكامل. تبقى معلوماتك عن الدورة والخصوبة والصحة على هذا الجهاز ولا تُرسل أبدًا إلى شبكة إعلانية.</string>
+    <string name="ads_consent_point_offline">معلوماتك الصحية لا تغادر هذا الجهاز أبدًا.</string>
+    <string name="ads_consent_point_no_personalisation">ستكون الإعلانات غير مخصّصة، ولا يُبنى ملف من نشاطك.</string>
+    <string name="ads_consent_point_no_cost">الرفض لا يغيّر شيئًا. كل الميزات تبقى متاحة.</string>
+    <string name="ads_consent_detail">إذا قبلت، قد يعرض هذا التطبيق إعلانات من Google AdMob. تُستخدم إعلانات غير مخصّصة، ولا يُطلب معرّف الإعلانات.</string>
+    <string name="ads_consent_accept">قبول</string>
+    <string name="ads_consent_decline">لا شكرا</string>
+    <string name="ads_settings_title">الإعلانات</string>
+    <string name="ads_settings_state_off">موقوفة. لا يعرض NISAA CARE أي إعلانات.</string>
+    <string name="ads_settings_state_on">مفعّلة. إعلانات غير مخصّصة فقط.</string>
+    <string name="ads_settings_change">تغيير الاختيار</string>
 </resources>

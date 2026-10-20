@@ -15,6 +15,9 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import com.zamcan.nisaacare.core.ads.AdSlot
+import com.zamcan.nisaacare.core.ads.AdsConfiguration
+import com.zamcan.nisaacare.core.ads.AdsConsent
 import com.zamcan.nisaacare.core.localization.LocaleManager
 import com.zamcan.nisaacare.data.content.SeedContent
 import com.zamcan.nisaacare.domain.model.AppLanguage
@@ -32,6 +35,7 @@ import com.zamcan.nisaacare.domain.model.UserRole
 import com.zamcan.nisaacare.domain.health.HealthSourceCatalog
 import com.zamcan.nisaacare.domain.health.MenstrualLearningCatalog
 import com.zamcan.nisaacare.domain.islamic.MenstruationFaithCatalog
+import com.zamcan.nisaacare.ui.AdBannerSlot
 import com.zamcan.nisaacare.ui.NisaaCalendarView
 import com.zamcan.nisaacare.ui.NisaaDesign
 import com.zamcan.nisaacare.ui.PatternView
@@ -42,7 +46,11 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-internal fun MainActivity.addSpaced(parent: LinearLayout, child: View, topDp: Int = 12) {
+internal fun MainActivity.addSpaced(parent: LinearLayout, child: View?, topDp: Int = 12) {
+    // A null child means there is nothing to show, for example an ad slot that
+    // has no ad. In that case no space is reserved either, so the layout does
+    // not carry an empty gap.
+    if (child == null) return
     parent.addView(child)
     parent.addView(NisaaDesign.space(this, 0, topDp))
 }
@@ -50,16 +58,23 @@ internal fun MainActivity.addSpaced(parent: LinearLayout, child: View, topDp: In
 internal fun MainActivity.standardScreen(
     title: CharSequence,
     onBack: () -> Unit = { navigate(AppScreen.HOME) },
+    adSlot: AdSlot = AdSlot.SAFE,
     buildBody: (LinearLayout) -> Unit
 ): View {
     val root = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setBackgroundColor(NisaaDesign.color(this@standardScreen, R.color.nisaa_cream))
+        // Transparent: the shell already painted the aurora backdrop. An opaque
+        // fill here would hide it from this screen's glass panels.
+        setBackgroundColor(android.graphics.Color.TRANSPARENT)
     }
     root.addView(NisaaDesign.header(this, title, onBack))
     val scroll = NisaaDesign.screenScroll(this)
     val body = scroll.getChildAt(0) as LinearLayout
     buildBody(body)
+    // The banner sits at the foot of the scroll content, so it moves with the
+    // list rather than floating over it. Reading screens pass
+    // AdSlot.PROHIBITED and get no banner at all.
+    addSpaced(body, AdBannerSlot.build(this, adProvider, adSlot), 18)
     root.addView(scroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
     return root
 }
@@ -253,6 +268,9 @@ internal fun MainActivity.buildWomanHome(): View {
         addSpaced(body, NisaaDesign.statusPill(this, getString(R.string.state_offline), false), 0)
     }
     addSpaced(body, NisaaDesign.body(this, getString(R.string.home_health_disclaimer)), 18)
+    // The home screen is the most visited surface in the app, so it carries a
+    // banner. It sits below the health disclaimer rather than above it.
+    addSpaced(body, AdBannerSlot.build(this, adProvider, AdSlot.SAFE), 0)
     root.addView(scroll, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     return root
 }
@@ -699,7 +717,7 @@ private fun MainActivity.topicCard(item: ContentItem): LinearLayout = NisaaDesig
     addView(NisaaDesign.icon(this@topicCard, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 20))
 }
 
-internal fun MainActivity.buildTopicScreen(item: ContentItem): View = standardScreen(contentTopicLabel(item.topicKey), { navigate(if (item.contentType == ContentType.HEALTH) AppScreen.HEALTH else AppScreen.FAITH) }) { body ->
+internal fun MainActivity.buildTopicScreen(item: ContentItem): View = standardScreen(contentTopicLabel(item.topicKey), { navigate(if (item.contentType == ContentType.HEALTH) AppScreen.HEALTH else AppScreen.FAITH) }, AdSlot.PROHIBITED) { body ->
     val status = NisaaDesign.card(this, 20)
     status.addView(NisaaDesign.statusPill(this, reviewLabel(item.reviewState), item.reviewState == ReviewState.VERIFIED || item.reviewState == ReviewState.PUBLISHED))
     status.addView(NisaaDesign.space(this, 0, 13))
@@ -746,7 +764,7 @@ private fun MainActivity.languageName(language: AppLanguage): String = when (lan
     AppLanguage.ARABIC -> getString(R.string.language_arabic)
 }
 
-internal fun MainActivity.buildQuotationScreen(): View = standardScreen(getString(R.string.quotation_title)) { body ->
+internal fun MainActivity.buildQuotationScreen(): View = standardScreen(getString(R.string.quotation_title), onBack = { navigate(AppScreen.FAITH) }, adSlot = AdSlot.PROHIBITED) { body ->
     val card = infoCard(getString(R.string.content_rotation_title), getString(R.string.content_rotation_body), R.drawable.ic_faith, soft = true)
     addSpaced(body, card, 0)
     val placeholder = NisaaDesign.card(this, 20)
@@ -776,6 +794,20 @@ internal fun MainActivity.buildSettingsScreen(): View = standardScreen(getString
     addSpaced(body, settingsRow(getString(R.string.settings_about), getString(R.string.version_format, BuildConfig.VERSION_NAME), R.drawable.ic_nisaa_mark) { navigate(AppScreen.ABOUT) }, 10)
     val roleLabel = if (profile?.role == UserRole.HUSBAND) getString(R.string.settings_role_husband) else getString(R.string.settings_role_woman)
     addSpaced(body, settingsRow(getString(R.string.settings_role), roleLabel, R.drawable.ic_relationship) { switchExperienceRole() }, 10)
+    // The advertising row only appears when advertising is actually enabled in
+    // this build. Showing "Advertising: off" in a build that has no advertising
+    // code at all would be confusing.
+    if (AdsConfiguration.enabled) {
+        val consentState = adsConsentStore.current()
+        val stateLabel = if (consentState == AdsConsent.GRANTED) {
+            getString(R.string.ads_settings_state_on)
+        } else {
+            getString(R.string.ads_settings_state_off)
+        }
+        addSpaced(body, settingsRow(getString(R.string.ads_settings_title), stateLabel, R.drawable.ic_shield) {
+            showAdsConsentSheet()
+        }, 10)
+    }
     val status = NisaaDesign.softCard(this, 18)
     status.addView(NisaaDesign.icon(this, R.drawable.ic_lock, R.color.nisaa_rose, 25))
     status.addView(NisaaDesign.space(this, 0, 8))

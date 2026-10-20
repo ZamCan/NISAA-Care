@@ -263,4 +263,19 @@
     <string name="care_review_title">Muundo unaofaa kuangaliwa</string>
     <string name="care_review_body">Baadhi ya taarifa ulizorekodi zinaweza kuwa sababu ya kuzungumza na mtaalamu wa afya, hasa zikidumu, kuongezeka, au kuathiri maisha ya kila siku.</string>
     <string name="calendar_fertile_legend">Dirisha la uzazi</string>
+
+    <!-- Advertising consent. Shown only when advertising is enabled in the build. -->
+    <string name="ads_consent_eyebrow">Hiari</string>
+    <string name="ads_consent_title">Supportsha NISAA CARE kwa tangaza</string>
+    <string name="ads_consent_body">NISAA CARE inafanya kazi kabisa bila mtandao. Taarifa zako za mwezi, uwezekano wa kuzaliwa na afya zinabaki kwenye kifaa hiki na hazitumwi kwa mtandao wa tangaza.</string>
+    <string name="ads_consent_point_offline">Taarifa zako za afya hayatoki kwenye kifaa hiki.</string>
+    <string name="ads_consent_point_no_personalisation">Tangaza zitakuwa hazibinafsishwi. Hakuna wasifu unaoundwa kutoka shughuli zako.</string>
+    <string name="ads_consent_point_no_cost">Kukataa hakubadilishi chochote. Kila kipengele bado hufanya kazi.</string>
+    <string name="ads_consent_detail">Ukikubali, programu hii inaweza kuonyesha tangaza za Google AdMob. Tangaza hazibinafsishwi zitatumika, na kitambulisho cha tangaza hakitombwa.</string>
+    <string name="ads_consent_accept">Kubali</string>
+    <string name="ads_consent_decline">Asante, sitaki</string>
+    <string name="ads_settings_title">Tangaza</string>
+    <string name="ads_settings_state_off">Imezimwa. NISAA CARE haionyeshi tangaza.</string>
+    <string name="ads_settings_state_on">Imewasha. Tangaza hazibinafsishwi pekee.</string>
+    <string name="ads_settings_change">Badilisha uamuzi</string>
 </resources>
