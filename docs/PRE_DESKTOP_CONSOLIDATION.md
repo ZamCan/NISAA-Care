@@ -51,3 +51,21 @@ git clone --branch engineering/consolidation-pre-desktop https://github.com/ZamC
 cd NISAA-Care
 git status
 ```
+
+
+## Personal cycle wheel implementation
+
+The native `CycleRingView` now draws a full circular cycle timeline with distinct
+menstruation, follicular, estimated ovulation-window, and luteal segments. A marker
+indicates the current estimated cycle-day position; the center keeps the day number
+readable. The Cycle screen adds a localized colour key using the existing phase strings.
+
+The wheel is intentionally an explanatory estimate based on the configured/derived
+cycle length. It does not establish that ovulation occurred, diagnose a condition,
+or identify safe days for contraception. Predictions must remain qualified by the
+cycle data quality and confidence shown on the screen.
+
+Validation note: the previously recorded workflow run (39461045069) succeeded for
+the earlier consolidation commit. The new wheel commits require a fresh CI run before
+the integration branch can be certified; the earlier success is not evidence that
+these latest changes have compiled.
