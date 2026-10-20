@@ -1,13 +1,50 @@
 # Pre-desktop consolidation record
 
-## Integration branch
+## Consolidated branch
 
-- Branch: `engineering/consolidation-pre-desktop`
-- Foundation: `engineering/premium-native-pairing-knowledge`
-- Protected production baseline: `main` (not modified by this consolidation)
-- Validation PR: https://github.com/ZamCan/NISAA-Care/pull/7
+- Branch: `main`
+- Integration history: `engineering/premium-native-pairing-knowledge`, which
+  absorbed `engineering/consolidation-pre-desktop`
+- The engineering branches are retained as history, not as separate products.
 
-This branch is a consolidation candidate, not a release-certified snapshot. Keep the source branches until the Android verification workflow passes and the remaining integration decisions are reviewed.
+`main` is the single branch to clone. Every other branch is an ancestor of it
+or an ancestor of a branch that was merged into it, so no work is stranded on a
+scattered branch.
+
+## Consolidation outcome
+
+Every source branch was compared file by file against the integration branch
+before merging. The result:
+
+| Source branch | Outcome |
+|---|---|
+| `engineering/premium-native-pairing-knowledge` | the integration base |
+| `engineering/consolidation-pre-desktop` | merged: engine composition root, phase-segmented cycle wheel, consolidation record |
+| `engineering/pairing-qr-whatsapp` | QR generation taken, in a reconciled form; see below |
+| `engineering/theme-and-source-foundation` | already present, nothing to merge |
+| `engineering/premium-graphical-ux` | already present, nothing to merge |
+| `engineering/biological-health-core` | already present, nothing to merge |
+| `engineering/premium-foundation` | already present, nothing to merge |
+| `engineering/premium-native-polish-v2` | already an ancestor, nothing to merge |
+
+### What the QR branch needed reconciled
+
+The QR branch declared a second `PairingPayload` class in the same package as
+the existing `PairingExchange` payload, so copying it as written would not
+compile, and it used a different URI format.
+
+Rather than pick one, the existing canonical format is kept for encoding and
+the parser was extended to also accept the legacy format. A pairing code may
+have been produced by a different build than the one receiving it, so accepting
+both is the correct behaviour rather than a compromise.
+
+The branch's camera-scanning dependency was deliberately not taken. It would
+require the CAMERA permission in a privacy-first health application for a
+convenience feature. QR *generation* needs no permission and was taken, using
+the plain Java ZXing core encoder so the app gains no AndroidX surface.
+
+The branch's parser also used `android.net.Uri`, which throws outside an
+instrumented test. The integrated parser is framework-free and unit tested.
 
 ## Changes already integrated
 
@@ -44,12 +81,20 @@ Do not call this branch ready until the workflow succeeds and the generated debu
 
 ## Desktop clone
 
-After the verification gate passes, clone this branch (not `main` or an older feature branch):
+Clone `main`. It is the complete engine:
 
 ```sh
-git clone --branch engineering/consolidation-pre-desktop https://github.com/ZamCan/NISAA-Care.git
+git clone https://github.com/ZamCan/NISAA-Care.git
 cd NISAA-Care
 git status
+git log --oneline -5
+```
+
+To verify locally:
+
+```sh
+./gradlew test
+./gradlew assembleDebug
 ```
 
 
