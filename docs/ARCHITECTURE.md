@@ -1,5 +1,18 @@
 # Architecture and safety decisions
 
+## Single application engine
+
+`core/engine/NisaaCareEngine.kt` is the only concrete application composition
+root. `NisaaApplication` creates it once, and screens consume its shared
+repository and domain services. `AppContainer` is only a source-compatibility
+type alias; it does not create a second engine. Keep feature algorithms in
+their focused packages and wire them through this one root rather than
+constructing duplicate engines in activities or screens.
+
+The app remains a single Gradle Android application module (`:app`) so a clean
+clone builds as one app. Focused Kotlin packages are not separate apps or
+unlinked engines: they are components assembled by the single root.
+
 ## Layers
 
 - `domain/` contains deterministic, UI-independent rules and immutable models.
@@ -34,3 +47,24 @@ have multiple independent relationships.
 - Plain Android backup is disabled. Keystore-backed AES-GCM protects selected
   sensitive free-text values; production threat modeling and optional encrypted
   backup remain release work.
+
+
+## Canonical source map
+
+| Responsibility | Canonical location |
+| --- | --- |
+| App composition root | `app/src/main/java/com/zamcan/nisaacare/core/engine/NisaaCareEngine.kt` |
+| App startup | `NisaaApplication.kt` |
+| Cycle calculation and versioning | `domain/cycle/BiologicalEngine.kt` |
+| Cycle care prompts | `domain/cycle/CycleCareAssessment.kt` |
+| Content governance and selection | `domain/content/ContentEngine.kt` |
+| Islamic/worship context | `domain/worship/WorshipContextEngine.kt` |
+| Relationship and sharing rules | `domain/relationship/` |
+| Local persistence | `data/local/` and `data/content/` |
+| Screen composition | `ScreenBuilders.kt`, `RelationshipScreens.kt` |
+| Reusable native visual components | `ui/` |
+| Unit tests | `app/src/test/` |
+| Build and CI | root Gradle files and `.github/workflows/android.yml` |
+
+Avoid creating a second implementation of a domain rule in a screen builder.
+Screens call the canonical engine and format its result for the user.
