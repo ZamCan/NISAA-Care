@@ -20,6 +20,25 @@ The main branch contains a working native Android foundation with:
 - Unit tests for biological, content, relationship, and sync contracts.
 - Android verification workflow.
 
+## Baseline verified on 2026-10-20
+
+Branch `engineering/premium-native-pairing-knowledge` adds:
+
+- Glassmorphic surface system: layered translucent fills, gradient hairlines,
+  specular sheen, an aurora backdrop, and real `RenderEffect` blur on API 31+.
+- Adaptive layout driven by window width: floating glass bottom bar on compact
+  windows, glass side rail and a centred 720dp column on expanded ones.
+- Consent-gated advertising layer, off by default. The SDK is only linked when
+  the build enables it, only non-personalised ads are used, the advertising
+  identifier is never requested, and no ad appears on a reading screen.
+- Banner and interstitial formats with an interstitial rate limit of three
+  navigations and five minutes.
+- 37 unit tests covering the advertising policy and interstitial rate limit
+  alongside the existing domain, content, relationship and sync contracts.
+
+See `docs/ADVERTISING_AND_CONSENT.md`, `docs/DESIGN_SYSTEM.md` and
+`docs/UPSTREAM_SYNC.md`.
+
 ## Active engineering sequence
 
 ### Stage A — product foundation hardening
@@ -40,6 +59,14 @@ The main branch contains a working native Android foundation with:
 3. Add signed package verification and transactional install.
 4. Add rollback and installed-version tracking.
 5. Populate only verified, attributed content.
+
+### Stage D2 — monetisation and distribution
+1. Keep advertising off by default and consent-gated.
+2. Supply a live AdMob account only after the Play Console declarations in
+   `docs/ADVERTISING_AND_CONSENT.md` are accurate.
+3. Never request the advertising identifier or personalise ads.
+4. Keep ads out of reading surfaces.
+5. Review ad performance against retention before adding any format.
 
 ### Stage D — quotations
 1. Add translation groups and provenance.

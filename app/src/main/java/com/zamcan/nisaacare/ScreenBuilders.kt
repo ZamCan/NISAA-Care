@@ -15,6 +15,9 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import com.zamcan.nisaacare.core.ads.AdSlot
+import com.zamcan.nisaacare.core.ads.AdsConfiguration
+import com.zamcan.nisaacare.core.ads.AdsConsent
 import com.zamcan.nisaacare.core.localization.LocaleManager
 import com.zamcan.nisaacare.data.content.SeedContent
 import com.zamcan.nisaacare.domain.model.AppLanguage
@@ -29,16 +32,25 @@ import com.zamcan.nisaacare.domain.model.PermissionKey
 import com.zamcan.nisaacare.domain.model.Relationship
 import com.zamcan.nisaacare.domain.model.ReviewState
 import com.zamcan.nisaacare.domain.model.UserRole
+import com.zamcan.nisaacare.domain.health.HealthSourceCatalog
+import com.zamcan.nisaacare.domain.health.MenstrualLearningCatalog
+import com.zamcan.nisaacare.domain.islamic.MenstruationFaithCatalog
+import com.zamcan.nisaacare.ui.AdBannerSlot
 import com.zamcan.nisaacare.ui.NisaaCalendarView
 import com.zamcan.nisaacare.ui.NisaaDesign
 import com.zamcan.nisaacare.ui.PatternView
+import com.zamcan.nisaacare.ui.MenstrualScienceDiagramView
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-internal fun MainActivity.addSpaced(parent: LinearLayout, child: View, topDp: Int = 12) {
+internal fun MainActivity.addSpaced(parent: LinearLayout, child: View?, topDp: Int = 12) {
+    // A null child means there is nothing to show, for example an ad slot that
+    // has no ad. In that case no space is reserved either, so the layout does
+    // not carry an empty gap.
+    if (child == null) return
     parent.addView(child)
     parent.addView(NisaaDesign.space(this, 0, topDp))
 }
@@ -46,16 +58,23 @@ internal fun MainActivity.addSpaced(parent: LinearLayout, child: View, topDp: In
 internal fun MainActivity.standardScreen(
     title: CharSequence,
     onBack: () -> Unit = { navigate(AppScreen.HOME) },
+    adSlot: AdSlot = AdSlot.SAFE,
     buildBody: (LinearLayout) -> Unit
 ): View {
     val root = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setBackgroundColor(NisaaDesign.color(this@standardScreen, R.color.nisaa_cream))
+        // Transparent: the shell already painted the aurora backdrop. An opaque
+        // fill here would hide it from this screen's glass panels.
+        setBackgroundColor(android.graphics.Color.TRANSPARENT)
     }
     root.addView(NisaaDesign.header(this, title, onBack))
     val scroll = NisaaDesign.screenScroll(this)
     val body = scroll.getChildAt(0) as LinearLayout
     buildBody(body)
+    // The banner sits at the foot of the scroll content, so it moves with the
+    // list rather than floating over it. Reading screens pass
+    // AdSlot.PROHIBITED and get no banner at all.
+    addSpaced(body, AdBannerSlot.build(this, adProvider, adSlot), 18)
     root.addView(scroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
     return root
 }
@@ -155,9 +174,21 @@ internal fun MainActivity.buildWomanHome(): View {
             getString(R.string.home_today),
             if (name == null) getString(R.string.home_greeting_generic) else getString(R.string.home_greeting, name),
             getString(R.string.app_tagline),
-            R.drawable.nisaa_hero_wellness
+            R.drawable.nisaa_woman_care
         )
     )
+    body.addView(NisaaDesign.space(this, 0, 14))
+    addSpaced(body, NisaaDesign.softCard(this, 16).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        addView(NisaaDesign.icon(this@buildWomanHome, R.drawable.ic_health, R.color.nisaa_rose, 28))
+        addView(NisaaDesign.space(this@buildWomanHome, 12, 1))
+        addView(NisaaDesign.body(this@buildWomanHome, getString(R.string.home_wellbeing)).apply {
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        })
+        addView(NisaaDesign.icon(this@buildWomanHome, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 20))
+        setOnClickListener { navigate(AppScreen.HEALTH) }
+    }, 4)
     body.addView(NisaaDesign.space(this, 0, 18))
 
     val insight = calculateInsight()
@@ -237,6 +268,9 @@ internal fun MainActivity.buildWomanHome(): View {
         addSpaced(body, NisaaDesign.statusPill(this, getString(R.string.state_offline), false), 0)
     }
     addSpaced(body, NisaaDesign.body(this, getString(R.string.home_health_disclaimer)), 18)
+    // The home screen is the most visited surface in the app, so it carries a
+    // banner. It sits below the health disclaimer rather than above it.
+    addSpaced(body, AdBannerSlot.build(this, adProvider, AdSlot.SAFE), 0)
     root.addView(scroll, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     return root
 }
@@ -246,6 +280,13 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     val insight = calculateInsight()
     val summary = NisaaDesign.card(this, 18)
     if (insight.lastPeriodStart == null) {
+        summary.addView(android.widget.ImageView(this).apply {
+            setImageResource(R.drawable.nisaa_woman_care)
+            scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this@buildCycleScreen, 92))
+        })
+        summary.addView(NisaaDesign.space(this, 0, 8))
         summary.addView(NisaaDesign.text(this, getString(R.string.cycle_no_records), 18f, R.color.nisaa_ink, true))
         summary.addView(NisaaDesign.space(this, 0, 12))
         summary.addView(NisaaDesign.primaryButton(this, getString(R.string.cycle_add_record), R.drawable.ic_add) {
@@ -253,11 +294,56 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
             navigate(AppScreen.CYCLE_ENTRY)
         })
     } else {
+        val ring = com.zamcan.nisaacare.ui.CycleRingView(this).apply {
+            day = insight.cycleDay
+            cycleLength = insight.averageCycleLength
+            phase = phaseLabel(insight.currentPhase)
+        }
+        summary.addView(ring, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 190)))
+
+        // A compact, localized key explains the colours in the cycle wheel.
+        // The wheel is a personal estimate, not confirmation of ovulation.
+        val phaseLegend = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+        fun phaseLegendRow(labelA: Int, colorA: Int, labelB: Int, colorB: Int) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            fun item(label: Int, color: Int): View {
+                val item = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    setPadding(NisaaDesign.dp(this@buildCycleScreen, 4), NisaaDesign.dp(this@buildCycleScreen, 5), NisaaDesign.dp(this@buildCycleScreen, 4), NisaaDesign.dp(this@buildCycleScreen, 5))
+                }
+                val swatch = View(this@buildCycleScreen).apply {
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        shape = android.graphics.drawable.GradientDrawable.OVAL
+                        setColor(NisaaDesign.color(this@buildCycleScreen, color))
+                    }
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    layoutParams = LinearLayout.LayoutParams(NisaaDesign.dp(this@buildCycleScreen, 9), NisaaDesign.dp(this@buildCycleScreen, 9))
+                }
+                item.addView(swatch)
+                item.addView(NisaaDesign.space(this@buildCycleScreen, 6, 1))
+                item.addView(NisaaDesign.text(this@buildCycleScreen, getString(label), 12f, R.color.nisaa_ink, false))
+                return item
+            }
+            row.addView(item(labelA, colorA), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            row.addView(item(labelB, colorB), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            phaseLegend.addView(row)
+        }
+        phaseLegendRow(R.string.phase_menstruation, R.color.nisaa_rose, R.string.phase_follicular, R.color.nisaa_terracotta)
+        phaseLegendRow(R.string.phase_ovulation, R.color.nisaa_sage, R.string.phase_luteal, R.color.nisaa_gold)
+        summary.addView(NisaaDesign.space(this, 0, 4))
+        summary.addView(phaseLegend)
+        summary.addView(NisaaDesign.space(this, 0, 5))
+        summary.addView(NisaaDesign.body(this, getString(R.string.estimate_guidance)))
+        summary.addView(NisaaDesign.space(this, 0, 10))
         summary.addView(NisaaDesign.body(this, getString(R.string.last_period_start, dateText(insight.lastPeriodStart))))
-        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.cycle_day_label), insight.cycleDay?.let { getString(R.string.cycle_day_format, it) } ?: getString(R.string.optional)), 10)
-        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.cycle_phase_label), phaseLabel(insight.currentPhase)), 10)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.data_quality_label), dataQualityLabel(insight.dataQuality)), 10)
-        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.predicted_period_start), dateText(insight.predictedPeriodStart)), 12)
+        addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.predicted_period_start), dateText(insight.predictedPeriodStart)), 10)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.confidence_low), confidenceLabel(insight.confidence)), 10)
     }
     addSpaced(body, summary, 0)
@@ -282,6 +368,13 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     }
     val recordedPeriodDates = periodDates
     val patternDates = estimatedDates
+    val fertileDates = buildSet {
+        if (insight.fertileWindowStart != null && insight.fertileWindowEnd != null) {
+            addAll(generateSequence(insight.fertileWindowStart) { d -> d.plusDays(1) }
+                .takeWhile { it <= insight.fertileWindowEnd }
+                .toList())
+        }
+    }
     val calendarCard = NisaaDesign.card(this, 14)
     val calendarHeader = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
     calendarHeader.addView(NisaaDesign.text(this, getString(R.string.cycle_calendar), 18f, R.color.nisaa_ink, true).apply {
@@ -299,7 +392,8 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
     val calendar = NisaaCalendarView(this, resources.configuration.locales[0]).apply {
         showMonth(this@buildCycleScreen.calendarMonth)
         this.periodDates = recordedPeriodDates
-        this.estimatedDates = patternDates
+        this.fertileDates = fertileDates
+        this.estimatedDates = patternDates - fertileDates
         contentDescription = getString(R.string.cycle_calendar)
         onDateSelected = { date ->
             selectedCycleStart = date
@@ -309,11 +403,21 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
             navigate(AppScreen.CYCLE_ENTRY)
         }
     }
-    calendarCard.addView(calendar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 400)))
-    val legends = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-    legends.addView(NisaaDesign.statusPill(this, getString(R.string.calendar_period_legend), false))
-    legends.addView(NisaaDesign.space(this, 8, 1))
-    legends.addView(NisaaDesign.statusPill(this, getString(R.string.calendar_predicted_legend), true))
+    calendarCard.addView(calendar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 360)))
+    val legends = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        weightSum = 3f
+    }
+    val legendPeriod = NisaaDesign.statusPill(this, getString(R.string.calendar_period_legend), false)
+    legendPeriod.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+    legends.addView(legendPeriod)
+    val legendFertile = NisaaDesign.statusPill(this, getString(R.string.calendar_fertile_legend), true)
+    legendFertile.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+    legends.addView(legendFertile)
+    val legendEstimate = NisaaDesign.statusPill(this, getString(R.string.calendar_predicted_legend), true)
+    legendEstimate.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+    legends.addView(legendEstimate)
     calendarCard.addView(legends)
     addSpaced(body, calendarCard, 20)
 
@@ -514,34 +618,118 @@ private fun MainActivity.saveCycleFromEntry(notes: String) {
 }
 
 internal fun MainActivity.buildHealthScreen(): View = standardScreen(getString(R.string.health_title)) { body ->
-    cardTitle(body, getString(R.string.health_title), getString(R.string.health_intro))
-    SeedContent.health.forEach { topic ->
-        addSpaced(body, topicCard(topic), 10)
+    addSpaced(body, NisaaDesign.heroCard(
+        this,
+        getString(R.string.health_title),
+        getString(R.string.app_name),
+        getString(R.string.health_intro),
+        R.drawable.nisaa_woman_care
+    ), 0)
+
+    val language = LocaleManager.savedLanguage(this)
+    val cycleLesson = MenstrualLearningCatalog.lessons.first { it.id == "cycle_map" }
+    val mapCard = NisaaDesign.card(this, 20)
+    mapCard.addView(NisaaDesign.eyebrow(this, cycleLesson.titleFor(language)))
+    mapCard.addView(NisaaDesign.space(this, 0, 8))
+    mapCard.addView(MenstrualScienceDiagramView(this, cycleLesson.visual).apply {
+        contentDescription = cycleLesson.titleFor(language)
+    }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 190)))
+    mapCard.addView(NisaaDesign.space(this, 0, 7))
+    mapCard.addView(NisaaDesign.body(this, cycleLesson.bodyFor(language)))
+    addSpaced(body, mapCard, 12)
+
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.health_title)))
+    MenstrualLearningCatalog.lessons.filter { it.id != "cycle_map" }.forEach { lesson ->
+        addSpaced(body, learningLessonCard(lesson, language), 10)
     }
+
+    val sourcesCard = NisaaDesign.card(this, 18)
+    sourcesCard.addView(NisaaDesign.eyebrow(this, getString(R.string.sources_title)))
+    sourcesCard.addView(NisaaDesign.space(this, 0, 8))
+    sourcesCard.addView(NisaaDesign.body(this, getString(R.string.sources_body)))
+    HealthSourceCatalog.sources.take(8).forEach { source ->
+        val row = NisaaDesign.card(this, 12).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(source.url)))
+            }
+            addView(NisaaDesign.text(this@buildHealthScreen, source.publisher, 12f, R.color.nisaa_ink_soft, true))
+            addView(NisaaDesign.space(this@buildHealthScreen, 8, 1))
+            addView(NisaaDesign.body(this@buildHealthScreen, source.title).apply {
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            })
+            addView(NisaaDesign.icon(this@buildHealthScreen, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 18))
+        }
+        sourcesCard.addView(row)
+        sourcesCard.addView(NisaaDesign.space(this, 0, 6))
+    }
+    addSpaced(body, sourcesCard, 18)
+
     addSpaced(body, NisaaDesign.softCard(this, 18).apply {
         addView(NisaaDesign.icon(this@buildHealthScreen, R.drawable.ic_lock, R.color.nisaa_rose, 26))
         addView(NisaaDesign.space(this@buildHealthScreen, 0, 8))
         addView(NisaaDesign.body(this@buildHealthScreen, getString(R.string.home_health_disclaimer)))
-    }, 20)
+    }, 12)
+}
+
+private fun MainActivity.learningLessonCard(
+    lesson: com.zamcan.nisaacare.domain.health.MenstrualLesson,
+    language: AppLanguage
+): LinearLayout = NisaaDesign.card(this, 18).apply {
+    addView(NisaaDesign.text(this@learningLessonCard, lesson.titleFor(language), 18f, R.color.nisaa_ink, true))
+    addView(NisaaDesign.space(this@learningLessonCard, 0, 7))
+    addView(MenstrualScienceDiagramView(this@learningLessonCard, lesson.visual).apply {
+        contentDescription = lesson.titleFor(language)
+    }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this@learningLessonCard, 174)))
+    addView(NisaaDesign.space(this@learningLessonCard, 0, 8))
+    addView(NisaaDesign.body(this@learningLessonCard, lesson.bodyFor(language)))
+    lesson.takeawaysFor(language).forEach { takeaway ->
+        addView(NisaaDesign.space(this@learningLessonCard, 0, 7))
+        addView(NisaaDesign.dividerLabel(this@learningLessonCard, "•", takeaway))
+    }
+    addView(NisaaDesign.space(this@learningLessonCard, 0, 9))
+    addView(NisaaDesign.text(
+        this@learningLessonCard,
+        lesson.sourceIds.joinToString("  •  "),
+        10f,
+        R.color.nisaa_ink_soft,
+        true
+    ))
 }
 
 internal fun MainActivity.buildFaithScreen(): View = standardScreen(getString(R.string.faith_title)) { body ->
-    addSpaced(
-        body,
-        NisaaDesign.heroCard(
-            this,
-            getString(R.string.faith_title),
-            getString(R.string.app_name),
-            getString(R.string.faith_intro),
-            R.drawable.nisaa_hero_faith
-        ),
-        14
-    )
-    cardTitle(body, getString(R.string.faith_title), getString(R.string.faith_intro))
-    val worship = infoCard(getString(R.string.worship_context_title), getString(R.string.worship_context_body), R.drawable.ic_faith, soft = true)
-    addSpaced(body, worship, 0)
-    val quran = NisaaDesign.sectionTitle(this, getString(R.string.quran_title))
-    body.addView(quran)
+    addSpaced(body, NisaaDesign.heroCard(
+        this,
+        getString(R.string.faith_title),
+        getString(R.string.app_name),
+        getString(R.string.faith_intro),
+        R.drawable.nisaa_hero_faith
+    ), 14)
+
+    val language = LocaleManager.savedLanguage(this)
+    val careCard = NisaaDesign.card(this, 20)
+    careCard.addView(NisaaDesign.eyebrow(this, getString(R.string.worship_context_title)))
+    careCard.addView(NisaaDesign.space(this, 0, 8))
+    careCard.addView(MenstrualScienceDiagramView(this, com.zamcan.nisaacare.domain.health.LearningVisual.CARE_SIGNAL), LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 178)))
+    careCard.addView(NisaaDesign.space(this, 0, 8))
+    careCard.addView(NisaaDesign.body(this, getString(R.string.worship_context_body)))
+    addSpaced(body, careCard, 10)
+
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.topic_hayd)))
+    MenstruationFaithCatalog.lessons.forEach { lesson ->
+        val card = NisaaDesign.card(this, 18)
+        card.addView(NisaaDesign.text(this, lesson.titleFor(language), 18f, R.color.nisaa_ink, true))
+        card.addView(NisaaDesign.space(this, 0, 7))
+        card.addView(NisaaDesign.body(this, lesson.bodyFor(language)))
+        card.addView(NisaaDesign.space(this, 0, 8))
+        card.addView(NisaaDesign.dividerLabel(this, lesson.source, lesson.reference))
+        addSpaced(body, card, 9)
+    }
+
+    body.addView(NisaaDesign.sectionTitle(this, getString(R.string.quran_title)))
     SeedContent.islamic.filter { it.topicKey == "QURAN" }.forEach { addSpaced(body, topicCard(it), 9) }
     body.addView(NisaaDesign.sectionTitle(this, getString(R.string.hadith_title)))
     SeedContent.islamic.filter { it.topicKey == "HADITH" }.forEach { addSpaced(body, topicCard(it), 9) }
@@ -570,7 +758,7 @@ private fun MainActivity.topicCard(item: ContentItem): LinearLayout = NisaaDesig
     addView(NisaaDesign.icon(this@topicCard, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 20))
 }
 
-internal fun MainActivity.buildTopicScreen(item: ContentItem): View = standardScreen(contentTopicLabel(item.topicKey), { navigate(if (item.contentType == ContentType.HEALTH) AppScreen.HEALTH else AppScreen.FAITH) }) { body ->
+internal fun MainActivity.buildTopicScreen(item: ContentItem): View = standardScreen(contentTopicLabel(item.topicKey), { navigate(if (item.contentType == ContentType.HEALTH) AppScreen.HEALTH else AppScreen.FAITH) }, AdSlot.PROHIBITED) { body ->
     val status = NisaaDesign.card(this, 20)
     status.addView(NisaaDesign.statusPill(this, reviewLabel(item.reviewState), item.reviewState == ReviewState.VERIFIED || item.reviewState == ReviewState.PUBLISHED))
     status.addView(NisaaDesign.space(this, 0, 13))
@@ -617,7 +805,7 @@ private fun MainActivity.languageName(language: AppLanguage): String = when (lan
     AppLanguage.ARABIC -> getString(R.string.language_arabic)
 }
 
-internal fun MainActivity.buildQuotationScreen(): View = standardScreen(getString(R.string.quotation_title)) { body ->
+internal fun MainActivity.buildQuotationScreen(): View = standardScreen(getString(R.string.quotation_title), onBack = { navigate(AppScreen.FAITH) }, adSlot = AdSlot.PROHIBITED) { body ->
     val card = infoCard(getString(R.string.content_rotation_title), getString(R.string.content_rotation_body), R.drawable.ic_faith, soft = true)
     addSpaced(body, card, 0)
     val placeholder = NisaaDesign.card(this, 20)
@@ -647,6 +835,20 @@ internal fun MainActivity.buildSettingsScreen(): View = standardScreen(getString
     addSpaced(body, settingsRow(getString(R.string.settings_about), getString(R.string.version_format, BuildConfig.VERSION_NAME), R.drawable.ic_nisaa_mark) { navigate(AppScreen.ABOUT) }, 10)
     val roleLabel = if (profile?.role == UserRole.HUSBAND) getString(R.string.settings_role_husband) else getString(R.string.settings_role_woman)
     addSpaced(body, settingsRow(getString(R.string.settings_role), roleLabel, R.drawable.ic_relationship) { switchExperienceRole() }, 10)
+    // The advertising row only appears when advertising is actually enabled in
+    // this build. Showing "Advertising: off" in a build that has no advertising
+    // code at all would be confusing.
+    if (AdsConfiguration.enabled) {
+        val consentState = adsConsentStore.current()
+        val stateLabel = if (consentState == AdsConsent.GRANTED) {
+            getString(R.string.ads_settings_state_on)
+        } else {
+            getString(R.string.ads_settings_state_off)
+        }
+        addSpaced(body, settingsRow(getString(R.string.ads_settings_title), stateLabel, R.drawable.ic_shield) {
+            showAdsConsentSheet()
+        }, 10)
+    }
     val status = NisaaDesign.softCard(this, 18)
     status.addView(NisaaDesign.icon(this, R.drawable.ic_lock, R.color.nisaa_rose, 25))
     status.addView(NisaaDesign.space(this, 0, 8))

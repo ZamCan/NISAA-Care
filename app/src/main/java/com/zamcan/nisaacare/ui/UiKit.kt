@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.RippleDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +54,8 @@ object NisaaDesign {
         textSize = sizeSp
         setTextColor(color(context, colorRes))
         this.gravity = gravity
+        textDirection = View.TEXT_DIRECTION_LOCALE
+        textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         typeface = Typeface.create("sans", if (bold) Typeface.BOLD else Typeface.NORMAL)
         includeFontPadding = true
         setLineSpacing(dp(context, 3).toFloat(), 1f)
@@ -66,16 +70,115 @@ object NisaaDesign {
         typeface = Typeface.create("serif", Typeface.BOLD)
     }
 
+    fun nativeRow(
+        context: Context,
+        title: CharSequence,
+        supporting: CharSequence? = null,
+        iconRes: Int? = null,
+        selected: Boolean = false,
+        onClick: (() -> Unit)? = null
+    ): LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        minimumHeight = dp(context, 64)
+        setPadding(dp(context, 14), dp(context, 8), dp(context, 12), dp(context, 8))
+        background = if (selected) {
+            // Selected rows get tinted glass rather than an opaque swatch, so the
+            // aurora still shows through the active item.
+            Glass.surface(
+                context,
+                Glass.Level.THREE,
+                Glass.Radius.SM,
+                tintRes = R.color.nisaa_rose_soft,
+                tintAlpha = 190
+            )
+        } else {
+            Glass.surface(context, Glass.Level.ONE, Glass.Radius.SM)
+        }
+        isClickable = onClick != null
+        isFocusable = onClick != null
+        if (onClick != null) {
+            foreground = RippleDrawable(
+                ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)),
+                null,
+                rounded(context, Color.TRANSPARENT, null, Glass.radiusDp(Glass.Radius.SM))
+            )
+            setOnClickListener { onClick() }
+        }
+        if (iconRes != null) {
+            addView(
+                GlassIcons.well(
+                    context,
+                    iconRes,
+                    if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink_soft,
+                    sizeDp = 20,
+                    wellPaddingDp = 7,
+                    radiusDp = 11
+                )
+            )
+            addView(space(context, 12, 1))
+        }
+        addView(LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(text(context, title, 15f, if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink, selected))
+            if (supporting != null) {
+                addView(space(context, 0, 3))
+                addView(body(context, supporting).apply { textSize = 13f })
+            }
+        }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        if (selected) {
+            addView(icon(context, R.drawable.ic_check, R.color.nisaa_rose, 20))
+        } else if (onClick != null) {
+            addView(icon(context, R.drawable.ic_chevron_right, R.color.nisaa_ink_soft, 18))
+        }
+    }
+
+    fun topBar(
+        context: Context,
+        title: CharSequence,
+        subtitle: CharSequence? = null,
+        action: View? = null
+    ): LinearLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        setPadding(dp(context, 20), dp(context, 12), dp(context, 16), dp(context, 10))
+        addView(LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(serif(context, title, 23f).apply { maxLines = 1 })
+            if (subtitle != null) {
+                addView(space(context, 0, 2))
+                addView(body(context, subtitle).apply { textSize = 12.5f })
+            }
+        }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        if (action != null) addView(action)
+    }
+
     fun card(context: Context, paddingDp: Int = 18): LinearLayout = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         setPadding(dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp), dp(context, paddingDp))
-        background = rounded(context, color(context, R.color.nisaa_surface), color(context, R.color.nisaa_line), 20)
-        elevation = dp(context, 1).toFloat()
+        // Level ONE sits furthest back: content sits on ONE, panels that group
+        // other panels move to TWO, and overlays such as sheets use THREE.
+        background = Glass.surface(context, Glass.Level.ONE, Glass.Radius.MD)
+        // Elevation is deliberately zero. Translucent fills do not receive real
+        // shadows, and a fake drop shadow on glass reads as a grey halo.
+        elevation = 0f
         isFocusable = true
+        // Ripple must be transparent so it tints the glass instead of hiding it
+        // behind an opaque mask.
+        foreground = RippleDrawable(
+            ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)),
+            null,
+            rounded(context, Color.TRANSPARENT, null, Glass.radiusDp(Glass.Radius.MD))
+        )
     }
 
     fun softCard(context: Context, paddingDp: Int = 18): LinearLayout = card(context, paddingDp).apply {
-        background = rounded(context, color(context, R.color.nisaa_surface_alt), null, 20)
+        background = Glass.surface(context, Glass.Level.TWO, Glass.Radius.MD)
+    }
+
+    /** Elevated panel that groups other panels. */
+    fun glassPanel(context: Context, paddingDp: Int = 18): LinearLayout = card(context, paddingDp).apply {
+        background = Glass.surface(context, Glass.Level.THREE, Glass.Radius.LG)
     }
 
     fun primaryButton(
@@ -86,9 +189,13 @@ object NisaaDesign {
     ): LinearLayout = LinearLayout(context).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        minimumHeight = dp(context, 50)
-        setPadding(dp(context, 18), dp(context, 8), dp(context, 18), dp(context, 8))
-        background = rounded(context, color(context, R.color.nisaa_rose), null, 16)
+        minimumHeight = dp(context, 54)
+        setPadding(dp(context, 20), dp(context, 8), dp(context, 20), dp(context, 8))
+        // Primary stays opaque. A saturated call to action must not compete with
+        // the glass around it, and translucent text on glass is not accessible.
+        background = rounded(context, color(context, R.color.nisaa_rose), color(context, R.color.nisaa_rose_dark), 18, 1)
+        elevation = 0f
+        foreground = RippleDrawable(ColorStateList.valueOf(color(context, R.color.nisaa_rose_dark)), null, rounded(context, Color.TRANSPARENT, null, 18))
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -108,9 +215,16 @@ object NisaaDesign {
     ): LinearLayout = LinearLayout(context).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        minimumHeight = dp(context, 50)
-        setPadding(dp(context, 18), dp(context, 8), dp(context, 18), dp(context, 8))
-        background = rounded(context, color(context, R.color.nisaa_rose_soft), color(context, R.color.nisaa_rose), 16)
+        minimumHeight = dp(context, 54)
+        setPadding(dp(context, 20), dp(context, 8), dp(context, 20), dp(context, 8))
+        background = Glass.surface(
+            context,
+            Glass.Level.TWO,
+            Glass.Radius.MD,
+            tintRes = R.color.nisaa_rose_soft,
+            tintAlpha = 150
+        )
+        foreground = RippleDrawable(ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)), null, rounded(context, Color.TRANSPARENT, null, Glass.radiusDp(Glass.Radius.MD)))
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -130,9 +244,10 @@ object NisaaDesign {
     ): LinearLayout = LinearLayout(context).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        minimumHeight = dp(context, 48)
+        minimumHeight = dp(context, 50)
         setPadding(dp(context, 16), dp(context, 6), dp(context, 16), dp(context, 6))
-        background = rounded(context, Color.TRANSPARENT, color(context, R.color.nisaa_line), 16)
+        background = Glass.surface(context, Glass.Level.ONE, Glass.Radius.MD, sheen = false)
+        foreground = RippleDrawable(ColorStateList.valueOf(color(context, R.color.nisaa_rose_soft)), null, rounded(context, Color.TRANSPARENT, null, Glass.radiusDp(Glass.Radius.MD)))
         isClickable = true
         isFocusable = true
         contentDescription = label
@@ -180,13 +295,18 @@ object NisaaDesign {
     ): TextView = text(context, label, 13f, if (selected) R.color.nisaa_rose_dark else R.color.nisaa_ink_soft, selected).apply {
         gravity = Gravity.CENTER
         minHeight = dp(context, 40)
-        setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 6))
-        background = rounded(
-            context,
-            color(context, if (selected) R.color.nisaa_rose_soft else R.color.nisaa_surface),
-            color(context, if (selected) R.color.nisaa_rose else R.color.nisaa_line),
-            20
-        )
+        setPadding(dp(context, 15), dp(context, 6), dp(context, 15), dp(context, 6))
+        background = if (selected) {
+            Glass.surface(
+                context,
+                Glass.Level.THREE,
+                Glass.Radius.PILL,
+                tintRes = R.color.nisaa_rose_soft,
+                tintAlpha = 175
+            )
+        } else {
+            Glass.surface(context, Glass.Level.ONE, Glass.Radius.PILL, sheen = false)
+        }
         isClickable = onClick != null
         isFocusable = onClick != null
         if (onClick != null) setOnClickListener { onClick() }
@@ -203,9 +323,12 @@ object NisaaDesign {
         setTextColor(color(context, R.color.nisaa_ink))
         setHintTextColor(color(context, R.color.nisaa_ink_soft))
         setSingleLine(true)
-        minHeight = dp(context, 52)
+        minHeight = dp(context, 54)
         setPadding(dp(context, 16), dp(context, 8), dp(context, 16), dp(context, 8))
-        background = rounded(context, color(context, R.color.nisaa_surface), color(context, R.color.nisaa_line), 14)
+        // Text fields stay close to opaque. Body text sitting on a 62% translucent
+        // fill over a moving backdrop is genuinely harder to read, so fields trade
+        // the glass look for legibility. The hairline still reads as glass.
+        background = Glass.surface(context, Glass.Level.ONE, Glass.Radius.SM, sheen = false)
     }
 
     fun multilineField(
@@ -231,7 +354,16 @@ object NisaaDesign {
     }
 
     fun divider(context: Context): View = View(context).apply {
-        setBackgroundColor(color(context, R.color.nisaa_line))
+        // A gradient divider, not a flat hairline. A flat line over glass reads as
+        // a scratch; fading it at both ends reads as a soft separation.
+        background = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+            intArrayOf(
+                android.graphics.Color.TRANSPARENT,
+                color(context, R.color.nisaa_line),
+                android.graphics.Color.TRANSPARENT
+            )
+        )
         layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(context, 1))
     }
 
@@ -251,9 +383,15 @@ object NisaaDesign {
 
     fun screenScroll(context: Context, body: LinearLayout = scrollBody(context)): ScrollView = ScrollView(context).apply {
         isFillViewport = true
-        setBackgroundColor(color(context, R.color.nisaa_cream))
+        // Transparent on purpose. This container sits directly on the aurora
+        // backdrop; an opaque fill would hide the backdrop and leave every glass
+        // panel above it with nothing to refract.
+        setBackgroundColor(Color.TRANSPARENT)
         addView(body, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
     }
+
+    /** Root background for a screen rendered over the shared aurora backdrop. */
+    fun screenBackdrop(context: Context): View = AuroraBackdropView(context)
 
     fun header(
         context: Context,
@@ -281,12 +419,14 @@ object NisaaDesign {
         positive: Boolean = true
     ): TextView = text(context, label, 12f, if (positive) R.color.nisaa_sage else R.color.nisaa_rose_dark, true).apply {
         gravity = Gravity.CENTER
-        setPadding(dp(context, 10), dp(context, 5), dp(context, 10), dp(context, 5))
-        background = rounded(
+        setPadding(dp(context, 11), dp(context, 5), dp(context, 11), dp(context, 5))
+        background = Glass.surface(
             context,
-            color(context, if (positive) R.color.nisaa_sage_soft else R.color.nisaa_rose_soft),
-            null,
-            20
+            Glass.Level.TWO,
+            Glass.Radius.PILL,
+            sheen = false,
+            tintRes = if (positive) R.color.nisaa_sage_soft else R.color.nisaa_rose_soft,
+            tintAlpha = 200
         )
     }
 
@@ -304,13 +444,16 @@ object NisaaDesign {
         body: CharSequence,
         artRes: Int
     ): FrameLayout = FrameLayout(context).apply {
-        background = rounded(context, color(context, R.color.nisaa_surface_alt), color(context, R.color.nisaa_line), 24)
-        minimumHeight = dp(context, 190)
+        background = Glass.surface(context, Glass.Level.TWO, Glass.Radius.XL)
+        minimumHeight = dp(context, 200)
+        // Required so the rounded glass fill actually clips the artwork to the
+        // corner radius; without it the hero art squares off the panel.
+        clipToOutline = true
         clipChildren = true
         val copy = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(context, 20), dp(context, 18), dp(context, 126), dp(context, 18))
+            setPadding(dp(context, 22), dp(context, 20), dp(context, 132), dp(context, 20))
             addView(eyebrow(context, eyebrow))
             addView(space(context, 0, 7))
             addView(serif(context, title, 24f))
@@ -321,12 +464,25 @@ object NisaaDesign {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         ))
-        addView(ImageView(context).apply {
-            setImageResource(artRes)
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-            alpha = 0.98f
-        }, FrameLayout.LayoutParams(dp(context, 190), dp(context, 190), Gravity.END or Gravity.CENTER_VERTICAL))
+        // Artwork is inset from the panel edge and sits in a media well, so it
+        // reads as content behind glass rather than a sticker on the surface.
+        addView(
+            FrameLayout(context).apply {
+                background = Glass.well(context, Glass.Radius.XL)
+                addView(
+                    ImageView(context).apply {
+                        setImageResource(artRes)
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    },
+                    FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                )
+            },
+            FrameLayout.LayoutParams(dp(context, 190), dp(context, 190), Gravity.END or Gravity.CENTER_VERTICAL)
+        )
     }
 
     fun statePanel(
@@ -335,11 +491,22 @@ object NisaaDesign {
         message: CharSequence,
         iconRes: Int? = null,
         action: View? = null
-    ): LinearLayout = softCard(context, 20).apply {
+    ): LinearLayout = glassPanel(context, 22).apply {
         gravity = Gravity.CENTER
         if (iconRes != null) {
-            addView(icon(context, iconRes, R.color.nisaa_rose, 30))
-            addView(space(context, 0, 10))
+            // Empty states get a large tinted well so the icon has presence
+            // without needing a filled background.
+            addView(
+                GlassIcons.well(
+                    context,
+                    iconRes,
+                    R.color.nisaa_rose,
+                    sizeDp = 30,
+                    wellPaddingDp = 14,
+                    radiusDp = 22
+                )
+            )
+            addView(space(context, 0, 12))
         }
         addView(text(context, title, 18f, R.color.nisaa_ink, true, Gravity.CENTER))
         addView(space(context, 0, 6))

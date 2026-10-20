@@ -18,12 +18,31 @@ class CycleCareAssessmentTest {
                     endDate = LocalDate.parse("2026-01-09"),
                     flow = FlowIntensity.HEAVY
                 ),
-                CycleRecord(userId = "u", startDate = LocalDate.parse("2026-01-25"))
+                CycleRecord(userId = "u", startDate = LocalDate.parse("2026-02-20"))
             )
         ).map { it.key }
 
         assertTrue("PERIOD_OVER_7_DAYS" in flags)
         assertTrue("HEAVY_FLOW_LOGGED" in flags)
         assertTrue("CYCLE_OUTSIDE_21_35_DAYS" in flags)
+    }
+
+    @Test
+    fun doesNotFlagCycleLengthInsideCommonRange() {
+        val flags = CycleCareAssessment.evaluate(
+            listOf(
+                CycleRecord(
+                    userId = "u",
+                    startDate = LocalDate.parse("2026-01-01"),
+                    endDate = LocalDate.parse("2026-01-06"),
+                    flow = FlowIntensity.MEDIUM
+                ),
+                CycleRecord(userId = "u", startDate = LocalDate.parse("2026-01-25"))
+            )
+        ).map { it.key }
+
+        assertTrue("PERIOD_OVER_7_DAYS" !in flags)
+        assertTrue("HEAVY_FLOW_LOGGED" !in flags)
+        assertTrue("CYCLE_OUTSIDE_21_35_DAYS" !in flags)
     }
 }

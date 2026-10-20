@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Night counterpart of glass_colors.xml.
+
+    The light-theme file stacks pale translucent fills over a light aurora. At
+    night that same recipe turns to mush, because white-at-62% over a dark
+    backdrop simply raises the black level and kills contrast.
+
+    Night inverts the approach: the fills become *dark* translucent ink instead
+    of white, and the hairlines flip so the top edge is still the bright one.
+    That keeps the same "lit from above" read in both themes.
+-->
+<resources>
+    <color name="nisaa_glass_backdrop_base">#FF1A141F</color>
+    <color name="nisaa_glass_blob_rose">#FF5C2739</color>
+    <color name="nisaa_glass_blob_lilac">#FF3C2C52</color>
+    <color name="nisaa_glass_blob_sage">#FF24362E</color>
+    <color name="nisaa_glass_blob_gold">#FF453520</color>
+
+    <!-- Dark ink over a dark aurora. Slightly higher alpha than light, because
+         the backdrop already supplies most of the luminance. -->
+    <color name="nisaa_glass_fill_1">#8C1E1826</color>
+    <color name="nisaa_glass_fill_2">#A8241D2E</color>
+    <color name="nisaa_glass_fill_3">#BC2C2437</color>
+
+    <!-- Hairlines: the top edge picks up light, the base edge loses it. -->
+    <color name="nisaa_glass_stroke_top">#4DFFFFFF</color>
+    <color name="nisaa_glass_stroke_bottom">#33FFFFFF</color>
+    <color name="nisaa_glass_stroke_strong_top">#73FFFFFF</color>
+    <color name="nisaa_glass_stroke_strong_bottom">#40FFFFFF</color>
+
+    <!-- Specular highlight is weaker at night so it reads as a sheen, not a glow. -->
+    <color name="nisaa_glass_specular">#26FFFFFF</color>
+
+    <color name="nisaa_glass_well">#59000000</color>
+    <color name="nisaa_glass_well_stroke">#33FFFFFF</color>
+
+    <color name="nisaa_glass_bar_scrim">#73000000</color>
+</resources>

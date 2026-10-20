@@ -18,6 +18,12 @@ that every planned product surface is complete. It includes:
 - Swahili (default), English, and Arabic resources with RTL foundation.
 - Premium calm design system with vector icons, accessible touch targets,
   cards, chips, state panels, custom calendar, and light/dark color tokens.
+- Glassmorphic surface system: translucent layered fills, gradient hairlines,
+  specular sheen, and an aurora backdrop with real `RenderEffect` blur on
+  API 31+. Depth is expressed by stacking levels rather than elevation.
+- Adaptive layout driven by window width, not display width: a floating glass
+  bottom bar on compact windows, a glass side rail and a centred 720dp content
+  column on expanded ones.
 - Progressive onboarding, role-aware home shell, cycle entry/history, custom
   menstrual calendar, fertility estimates, health/faith content states,
   marriage/permissions, husband view, settings, sources, and content-version
@@ -32,6 +38,31 @@ that every planned product surface is complete. It includes:
 - Android Keystore-backed encryption foundation for sensitive free-text values.
 - Debug and release build configuration; release signing is opt-in through
   untracked Gradle properties.
+- Consent-gated advertising layer that is off by default. The Google Mobile Ads
+  SDK is only linked when the build explicitly enables it, only non-personalised
+  ads are used, the advertising identifier is never requested, and no ad is
+  placed on a reading screen. See `docs/ADVERTISING_AND_CONSENT.md`.
+
+## One-clone application structure
+
+The Android application is assembled through one app-scoped engine:
+`core/engine/NisaaCareEngine.kt`. It owns the shared local repository and
+constructs the biological, content, relationship, worship-context, and local
+notification services once. The implementation files remain grouped by
+responsibility under `domain/`, `data/`, `core/`, and `ui/`; they are
+components of the same app, not independent apps. Start at
+`NisaaApplication.kt` for composition and `docs/ARCHITECTURE.md` for the
+source map.
+
+`main` is the consolidated branch. Clone it directly:
+
+```bash
+git clone https://github.com/ZamCan/NISAA-Care.git
+cd NISAA-Care
+```
+
+The `engineering/*` branches are retained as history. They are not separate
+products and none of them contains work that is missing from `main`.
 
 ## Build
 
@@ -65,6 +96,26 @@ NISAA_RELEASE_KEY_PASSWORD=...
 
 The release build remains available without a key as an unsigned development
 artifact; do not publish it until signing and Play App Signing are configured.
+
+## Optional advertising
+
+Advertising is **off by default** and requires an explicit user opt-in. A
+default checkout does not link the Google Mobile Ads SDK, does not commit any
+AdMob account identifier, and cannot request an ad.
+
+```bash
+./gradlew -Pnisaa.ads.enabled=true \
+          -Pnisaa.admob.appId=ca-app-pub-... \
+          -Pnisaa.admob.safeUnitId=ca-app-pub-.../... \
+          -Pnisaa.admob.interstitialUnitId=ca-app-pub-.../... \
+          assembleRelease
+```
+
+Formats used are a banner at the foot of a list and an interstitial at a
+natural break, rate limited to at most one every three navigations and five
+minutes. There is no rewarded video. Full detail, including the Play Console
+declarations that enabling it requires, is in
+`docs/ADVERTISING_AND_CONSENT.md`.
 
 ## Safety and content governance
 

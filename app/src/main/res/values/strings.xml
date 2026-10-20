@@ -271,4 +271,24 @@
     <string name="data_quality_variable">Variable</string>
     <string name="care_review_title">A pattern worth reviewing</string>
     <string name="care_review_body">Some logged observations can be worth discussing with a qualified health professional, especially if they persist, worsen, or affect daily life.</string>
+    <string name="calendar_fertile_legend">Fertile window</string>
+
+    <!-- Advertising consent. Shown only when advertising is enabled in the build. -->
+    <string name="ads_consent_eyebrow">Optional</string>
+    <string name="ads_consent_title">Support NISAA CARE with ads</string>
+    <string name="ads_consent_body">NISAA CARE works fully offline. Your cycle, fertility and health information stays on this device and is never sent to an advertising network.</string>
+    <string name="ads_consent_point_offline">Your health information never leaves this device.</string>
+    <string name="ads_consent_point_no_personalisation">Ads would be non-personalised. No profile is built from your activity.</string>
+    <string name="ads_consent_point_no_cost">Declining changes nothing. Every feature keeps working.</string>
+    <string name="ads_consent_detail">If you accept, this app may display advertising from Google AdMob. Non-personalised ads are used, and the advertising identifier is not requested.</string>
+    <string name="ads_consent_accept">Accept</string>
+    <string name="ads_consent_decline">No thanks</string>
+    <string name="ads_settings_title">Advertising</string>
+    <string name="ads_settings_state_off">Off. NISAA CARE shows no ads.</string>
+    <string name="ads_settings_state_on">On. Non-personalised ads only.</string>
+    <string name="ads_settings_change">Change choice</string>
+    <!-- Nearby pairing QR. The code carries only a short-lived credential. -->
+    <string name="pairing_qr_title">Nearby QR pairing</string>
+    <string name="pairing_qr_body">Show this code to your spouse nearby, or scan their NISAA CARE code. The QR contains only a short-lived pairing credential.</string>
+    <string name="pairing_show_qr">Show QR code</string>
 </resources>
