@@ -43,6 +43,29 @@ that every planned product surface is complete. It includes:
   ads are used, the advertising identifier is never requested, and no ad is
   placed on a reading screen. See `docs/ADVERTISING_AND_CONSENT.md`.
 
+## One-clone application structure
+
+The Android application is assembled through one app-scoped engine:
+`core/engine/NisaaCareEngine.kt`. It owns the shared local repository and
+constructs the biological, content, relationship, worship-context, and local
+notification services once. The implementation files remain grouped by
+responsibility under `domain/`, `data/`, `core/`, and `ui/`; they are
+components of the same app, not independent apps. Start at
+`NisaaApplication.kt` for composition and `docs/ARCHITECTURE.md` for the
+source map.
+
+The integration candidate is currently on
+`engineering/consolidation-pre-desktop` while CI verifies the consolidated
+tree. To clone that candidate explicitly:
+
+```bash
+git clone --branch engineering/consolidation-pre-desktop https://github.com/ZamCan/NISAA-Care.git
+cd NISAA-Care
+```
+
+Use the default `main` branch for the stable baseline until the integration
+pull request is validated and merged.
+
 ## Build
 
 The checked-in wrapper targets Gradle 8.9. The Android toolchain used for the
