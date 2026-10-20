@@ -278,4 +278,8 @@
     <string name="ads_settings_state_off">موقوفة. لا يعرض NISAA CARE أي إعلانات.</string>
     <string name="ads_settings_state_on">مفعّلة. إعلانات غير مخصّصة فقط.</string>
     <string name="ads_settings_change">تغيير الاختيار</string>
+    <!-- Nearby pairing QR. The code carries only a short-lived credential. -->
+    <string name="pairing_qr_title">الاقتران عبر QR عند القرب</string>
+    <string name="pairing_qr_body">اعرض هذا الرمز لزوجك أو زوجتك القريب منك. يحتوي رمز QR على بيانات اقتران مؤقتة فقط.</string>
+    <string name="pairing_show_qr">عرض رمز QR</string>
 </resources>

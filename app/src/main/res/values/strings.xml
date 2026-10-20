@@ -287,4 +287,8 @@
     <string name="ads_settings_state_off">Off. NISAA CARE shows no ads.</string>
     <string name="ads_settings_state_on">On. Non-personalised ads only.</string>
     <string name="ads_settings_change">Change choice</string>
+    <!-- Nearby pairing QR. The code carries only a short-lived credential. -->
+    <string name="pairing_qr_title">Nearby QR pairing</string>
+    <string name="pairing_qr_body">Show this code to your spouse nearby, or scan their NISAA CARE code. The QR contains only a short-lived pairing credential.</string>
+    <string name="pairing_show_qr">Show QR code</string>
 </resources>

@@ -154,6 +154,13 @@ android {
 dependencies {
     testImplementation("junit:junit:4.13.2")
 
+    // ZXing core, used only to draw the pairing QR code locally. It is a plain
+    // Java library with no Android dependency, so it adds no AndroidX surface
+    // and no camera permission. The scanning dependency from the pairing
+    // branch is deliberately not taken: it would require the CAMERA permission
+    // in a privacy-first app for a convenience feature.
+    implementation("com.google.zxing:core:3.5.3")
+
     // The Google Mobile Ads SDK is only linked when advertising is explicitly
     // enabled. A default build stays dependency-free, which keeps the app's
     // offline-first and privacy-first guarantees true by construction rather

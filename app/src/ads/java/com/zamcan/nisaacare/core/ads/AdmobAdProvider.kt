@@ -1,5 +1,6 @@
 package com.zamcan.nisaacare.core.ads
 
+import android.app.Activity
 import android.content.Context
 import android.view.View
 import com.google.android.gms.ads.AdError
@@ -44,10 +45,11 @@ internal class AdmobAdProvider(context: Context) : AdProvider {
     override fun initialise(context: Context): Boolean {
         if (!isAvailable || initialised) return initialised
         return runCatching {
-            MobileAds.initialize(context) { status ->
-                initialised = status.adServicesInitializationStatus ==
-                    com.google.android.gms.ads.initialization.InitializationStatus.AD_SERVICES_STATUS_SUCCESS
-            }
+            // The listener fires once initialisation completes. The SDK reports
+            // per-adapter status on the callback argument, but a failure for one
+            // adapter does not stop the others, so a completed initialisation is
+            // treated as success and individual requests degrade on their own.
+            MobileAds.initialize(context) { initialised = true }
             true
         }.getOrDefault(false)
     }
@@ -57,8 +59,7 @@ internal class AdmobAdProvider(context: Context) : AdProvider {
      *
      * The view is returned immediately so the caller can reserve the space,
      * and the ad fills in when it arrives. If loading fails the view simply
-     * stays empty, which is why the container collapses to zero height when
-     * nothing is showing.
+     * stays empty.
      */
     override fun createBannerAd(context: Context, slot: AdSlot): View? {
         if (!isAvailable || !initialised) return null
@@ -68,11 +69,13 @@ internal class AdmobAdProvider(context: Context) : AdProvider {
 
         return runCatching {
             val adView = AdView(context)
-            adView.adSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context)
-            adView.adUnitId = unitId
-            // An anchored adaptive banner sizes itself to the device width and
-            // the content inset, so it never covers a navigation control.
-            adView.setPadding(0, 0, 0, 0)
+            // An anchored adaptive banner sizes itself to the available width,
+            // so it never covers a navigation control or overflows a column.
+            val widthPx = context.resources.displayMetrics.widthPixels
+            adView.setAdSize(
+                AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthPx)
+            )
+            adView.setAdUnitId(unitId)
             adView.loadAd(buildRequest())
             adView
         }.getOrNull()
@@ -88,6 +91,7 @@ internal class AdmobAdProvider(context: Context) : AdProvider {
             InterstitialAd.load(
                 context,
                 unitId,
+                buildRequest(),
                 object : InterstitialAdLoadCallback() {
                     override fun onAdLoaded(ad: InterstitialAd) {
                         interstitialAd = ad
@@ -108,6 +112,12 @@ internal class AdmobAdProvider(context: Context) : AdProvider {
             onDismissed()
             return false
         }
+        // The SDK requires an Activity to present a full-screen ad. If the
+        // context is not one, the ad is dropped rather than forced.
+        val activity = context as? Activity ?: run {
+            onDismissed()
+            return false
+        }
         return runCatching {
             ad.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
@@ -120,7 +130,7 @@ internal class AdmobAdProvider(context: Context) : AdProvider {
                     onDismissed()
                 }
             }
-            ad.show(context)
+            ad.show(activity)
             true
         }.getOrElse {
             onDismissed()

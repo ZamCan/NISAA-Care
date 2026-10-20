@@ -278,4 +278,8 @@
     <string name="ads_settings_state_off">Imezimwa. NISAA CARE haionyeshi tangaza.</string>
     <string name="ads_settings_state_on">Imewasha. Tangaza hazibinafsishwi pekee.</string>
     <string name="ads_settings_change">Badilisha uamuzi</string>
+    <!-- Nearby pairing QR. The code carries only a short-lived credential. -->
+    <string name="pairing_qr_title">Kuunganisha kwa QR ukiwa karibu</string>
+    <string name="pairing_qr_body">Muonyeshe mwenzi wako msimbo huu akiwa karibu, au skani msimbo wake wa NISAA CARE. QR ina kitambulisho cha muda mfupi tu cha kuunganisha.</string>
+    <string name="pairing_show_qr">Onyesha QR</string>
 </resources>

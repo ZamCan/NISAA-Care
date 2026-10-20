@@ -10,6 +10,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
 import com.zamcan.nisaacare.domain.model.DomainResult
@@ -21,6 +22,7 @@ import com.zamcan.nisaacare.domain.model.RelationshipStatus
 import com.zamcan.nisaacare.domain.model.SupportRequest
 import com.zamcan.nisaacare.domain.model.UserRole
 import com.zamcan.nisaacare.domain.relationship.PairingExchange
+import com.zamcan.nisaacare.ui.PairingQrCode
 import com.zamcan.nisaacare.ui.NisaaDesign
 import java.util.UUID
 
@@ -141,6 +143,10 @@ private fun MainActivity.pairingCard(): LinearLayout = NisaaDesign.card(this, 20
         addView(NisaaDesign.primaryButton(this@pairingCard, getString(R.string.share_whatsapp), R.drawable.ic_share) { shareInvitation(invitation) })
         addView(NisaaDesign.space(this@pairingCard, 0, 8))
         addView(NisaaDesign.outlineButton(this@pairingCard, getString(R.string.copy_invitation), R.drawable.ic_check) { copyInvitation(invitation) })
+        addView(NisaaDesign.space(this@pairingCard, 0, 8))
+        addView(NisaaDesign.outlineButton(this@pairingCard, getString(R.string.pairing_show_qr), R.drawable.ic_share) {
+            showPairingQr(invitation)
+        })
     } else {
         addView(NisaaDesign.space(this@pairingCard, 0, 14))
         addView(NisaaDesign.primaryButton(this@pairingCard, getString(R.string.create_invitation), R.drawable.ic_add) { createInvitation() })
@@ -159,6 +165,41 @@ private fun MainActivity.pairingCard(): LinearLayout = NisaaDesign.card(this, 20
     addView(NisaaDesign.body(this@pairingCard, getString(R.string.pairing_not_configured)))
     addView(NisaaDesign.space(this@pairingCard, 0, 7))
     addView(NisaaDesign.body(this@pairingCard, getString(R.string.pairing_fallback)))
+}
+
+/**
+ * Shows the pairing QR code.
+ *
+ * The payload is the same canonical pairing URI that the share message uses,
+ * so a code scanned by this app and a link pasted into it resolve identically.
+ * The QR is rendered on the device and carries nothing beyond the
+ * short-lived credential.
+ */
+private fun MainActivity.showPairingQr(invitation: PairingInvitation) {
+    val link = PairingExchange.payload(
+        token = invitation.token,
+        inviterRole = invitation.inviterRole.name,
+        expiresAt = invitation.expiresAt
+    ).encode()
+    val size = NisaaDesign.dp(this, 560)
+    val bitmap = runCatching { PairingQrCode.create(link, size) }.getOrNull()
+    if (bitmap == null) {
+        showToast(getString(R.string.state_error))
+        return
+    }
+    AlertDialog.Builder(this)
+        .setTitle(R.string.pairing_qr_title)
+        .setMessage(R.string.pairing_qr_body)
+        .setIcon(android.R.drawable.ic_menu_share)
+        .setPositiveButton(R.string.onboarding_continue) { dialog, _ -> dialog.dismiss() }
+        .setView(
+            ImageView(this).apply {
+                setImageBitmap(bitmap)
+                contentDescription = getString(R.string.pairing_qr_title)
+                adjustViewBounds = true
+            }
+        )
+        .show()
 }
 
 private fun MainActivity.createInvitation() {
