@@ -300,6 +300,47 @@ internal fun MainActivity.buildCycleScreen(): View = standardScreen(getString(R.
             phase = phaseLabel(insight.currentPhase)
         }
         summary.addView(ring, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, NisaaDesign.dp(this, 190)))
+
+        // A compact, localized key explains the colours in the cycle wheel.
+        // The wheel is a personal estimate, not confirmation of ovulation.
+        val phaseLegend = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+        fun phaseLegendRow(labelA: Int, colorA: Int, labelB: Int, colorB: Int) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            fun item(label: Int, color: Int): View {
+                val item = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    setPadding(NisaaDesign.dp(this@buildCycleScreen, 4), NisaaDesign.dp(this@buildCycleScreen, 5), NisaaDesign.dp(this@buildCycleScreen, 4), NisaaDesign.dp(this@buildCycleScreen, 5))
+                }
+                val swatch = View(this@buildCycleScreen).apply {
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        shape = android.graphics.drawable.GradientDrawable.OVAL
+                        setColor(NisaaDesign.color(this@buildCycleScreen, color))
+                    }
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    layoutParams = LinearLayout.LayoutParams(NisaaDesign.dp(this@buildCycleScreen, 9), NisaaDesign.dp(this@buildCycleScreen, 9))
+                }
+                item.addView(swatch)
+                item.addView(NisaaDesign.space(this@buildCycleScreen, 6, 1))
+                item.addView(NisaaDesign.text(this@buildCycleScreen, getString(label), 12f, R.color.nisaa_ink, false))
+                return item
+            }
+            row.addView(item(labelA, colorA), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            row.addView(item(labelB, colorB), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            phaseLegend.addView(row)
+        }
+        phaseLegendRow(R.string.phase_menstruation, R.color.nisaa_rose, R.string.phase_follicular, R.color.nisaa_terracotta)
+        phaseLegendRow(R.string.phase_ovulation, R.color.nisaa_sage, R.string.phase_luteal, R.color.nisaa_gold)
+        summary.addView(NisaaDesign.space(this, 0, 4))
+        summary.addView(phaseLegend)
+        summary.addView(NisaaDesign.space(this, 0, 5))
+        summary.addView(NisaaDesign.body(this, getString(R.string.estimate_guidance)))
+        summary.addView(NisaaDesign.space(this, 0, 10))
         summary.addView(NisaaDesign.body(this, getString(R.string.last_period_start, dateText(insight.lastPeriodStart))))
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.data_quality_label), dataQualityLabel(insight.dataQuality)), 10)
         addViewWithTop(NisaaDesign.dividerLabel(this, getString(R.string.predicted_period_start), dateText(insight.predictedPeriodStart)), 10)
